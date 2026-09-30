@@ -4,6 +4,8 @@
 
 [6과정 출결 링크 : 시작 ](https://dxcheck.kr/ac1a23b2-618e-4c14-8f66-14d1e5068ffa)
 
+<img width="275" height="238" alt="image" src="https://github.com/user-attachments/assets/31fe4eb9-f64c-4b4f-9e60-e8cb2e554bc1" />
+
 ## 데이터 탐색처
 
 * 이론 연수 이후 공유: https://ask.affinitybubble.com/join/db6cfa89-abab-45ff-a04d-186855b57b1b
@@ -38,4 +40,11 @@
 ## 마무리 출결 링크 및 만족도 조사 링크(15:10분에 해주세요)
 
 [6과정 출결 링크 : 끝 ](https://dxcheck.kr/ac1a23b2-618e-4c14-8f66-14d1e5068ffa)
+<img width="275" height="238" alt="image" src="https://github.com/user-attachments/assets/877b9fcf-3387-4e74-ade1-c3b848c888b7" />
+
+
+
 [만족도 조사 링크: 6과정에 대해서 해주세요!] (https://walla.my/v/HgFyobTveel3lEgVlPuL)
+
+<img width="287" height="259" alt="image" src="https://github.com/user-attachments/assets/55b10c2c-6c30-4652-bbce-21ff567bf372" />
+
