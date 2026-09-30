@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>후성유전학과 항암 치료 — 스위치는 어떻게 켜지고 꺼지는가</title>
+<style>
+  :root{
+    --paper:#FAF8F3;
+    --panel:#FFFFFF;
+    --ink:#1B2421;
+    --ink-soft:#4B564F;
+    --ink-mute:#8A9188;
+    --line:#D8D3C4;
+    --teal:#0F6E56;
+    --teal-bg:#E1F5EE;
+    --teal-strong:#085041;
+    --coral:#D85A30;
+    --coral-bg:#FAECE7;
+    --coral-strong:#712B13;
+    --amber:#BA7517;
+    --amber-bg:#FAEEDA;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    line-height:1.7;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:48px 24px 96px;}
+  header.hero{
+    border-bottom:1px solid var(--line);
+    padding-bottom:32px;
+    margin-bottom:40px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono','Courier New',monospace;
+    font-size:12px;
+    letter-spacing:0.08em;
+    color:var(--teal-strong);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  h1{
+    font-size:32px;
+    font-weight:700;
+    margin:0 0 14px;
+    letter-spacing:-0.01em;
+  }
+  .hero p{color:var(--ink-soft);font-size:16px;max-width:640px;margin:0;}
+  h2{
+    font-size:20px;
+    font-weight:700;
+    margin:56px 0 6px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  h2 .num{
+    font-family:'JetBrains Mono','Courier New',monospace;
+    font-size:13px;
+    color:var(--ink-mute);
+    font-weight:400;
+  }
+  h2 + .lead{color:var(--ink-soft);font-size:15px;margin:0 0 24px;max-width:620px;}
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:24px;
+  }
+  .switchbar{display:flex;gap:8px;margin-bottom:20px;}
+  .switchbar button{
+    flex:1;
+    padding:10px 14px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    border-radius:4px;
+    font-size:14px;
+    font-weight:700;
+    color:var(--ink-soft);
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .switchbar button.active{
+    border-color:var(--teal);
+    color:var(--teal-strong);
+    background:var(--teal-bg);
+  }
+  svg text{font-family:inherit;}
+  .t{font-size:14px;fill:var(--ink);}
+  .ts{font-size:12px;fill:var(--ink-soft);}
+  .th{font-size:14px;font-weight:700;fill:var(--ink);}
+  .slider-row{display:flex;align-items:center;gap:12px;margin-top:18px;}
+  .slider-row label{font-size:13px;color:var(--ink-soft);white-space:nowrap;}
+  input[type=range]{flex:1;accent-color:var(--teal);}
+  #state-label{font-size:13px;font-weight:700;min-width:110px;text-align:right;color:var(--teal-strong);}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;}
+  .compare-grid .box{border-radius:4px;padding:18px;}
+  .compare-grid .box.mut{background:var(--coral-bg);border:1px solid var(--coral);}
+  .compare-grid .box.epi{background:var(--teal-bg);border:1px solid var(--teal);}
+  .compare-grid .box h3{margin:0 0 8px;font-size:15px;}
+  .box.mut h3{color:var(--coral-strong);}
+  .box.epi h3{color:var(--teal-strong);}
+  .compare-grid .box ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink-soft);}
+  .compare-grid .box li{margin-bottom:6px;}
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px;}
+  th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top;}
+  th{background:var(--paper);font-weight:700;color:var(--ink-soft);font-size:13px;}
+  .tag{
+    display:inline-block;
+    font-family:'JetBrains Mono','Courier New',monospace;
+    font-size:11px;
+    padding:2px 8px;
+    border-radius:3px;
+    margin-right:6px;
+  }
+  .tag.epi{background:var(--teal-bg);color:var(--teal-strong);}
+  .tag.immune{background:var(--amber-bg);color:#633806;}
+  .callout{
+    border-left:3px solid var(--coral);
+    background:var(--coral-bg);
+    padding:16px 18px;
+    border-radius:0 4px 4px 0;
+    margin-top:20px;
+    font-size:14px;
+    color:var(--coral-strong);
+  }
+  .callout strong{display:block;margin-bottom:6px;font-size:14px;}
+  .source{font-size:12px;color:var(--ink-mute);margin-top:6px;}
+  footer{
+    margin-top:64px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    font-size:12px;
+    color:var(--ink-mute);
+  }
+  @media (max-width:600px){
+    .compare-grid{grid-template-columns:1fr;}
+    h1{font-size:26px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">高3 · 국어 독서(과학) · 후성유전학</div>
+    <h1>스위치는 켜지고, 다시 꺼질 수도 있다</h1>
+    <p>DNA 염기서열은 그대로 둔 채 유전자의 발현만 조절하는 &ldquo;후성유전&rdquo;의 원리와, 이를 이용한 항암 치료의 논리를 따라가 본다.</p>
+  </header>
+
+  <section>
+    <h2><span class="num">01</span> 유전자 스위치 켜고 꺼보기</h2>
+    <p class="lead">DNA 메틸화와 히스톤 아세틸화는 서로 반대 방향으로 작동한다. 아래에서 화학기를 붙였다 떼면서 유전자 발현이 어떻게 바뀌는지 확인해보자.</p>
+    <div class="card">
+      <div class="switchbar">
+        <button id="btn-meth" class="active" onclick="setMode('meth')">DNA 메틸화</button>
+        <button id="btn-acet" onclick="setMode('acet')">히스톤 아세틸화</button>
+      </div>
+      <svg width="100%" viewBox="0 0 680 300" role="img">
+        <title>유전자 스위치 다이어그램</title>
+        <desc>메틸기 또는 아세틸기 부착 여부에 따라 프로모터가 열리거나 닫히는 모습을 표현한 다이어그램</desc>
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+        </defs>
+        <line x1="60" y1="150" x2="620" y2="150" stroke="var(--ink-mute)" stroke-width="3" opacity="0.5"/>
+        <text class="ts" x="60" y="130">DNA 가닥 (프로모터 부위)</text>
+        <g id="marks"></g>
+        <g id="gene-box">
+          <rect id="gene-rect" x="420" y="120" width="160" height="60" rx="8" stroke-width="1"/>
+          <text id="gene-title" class="th" x="500" y="142" text-anchor="middle" dominant-baseline="central">종양 억제 유전자</text>
+          <text id="gene-sub" class="ts" x="500" y="160" text-anchor="middle" dominant-baseline="central">발현 상태</text>
+        </g>
+        <line id="tf-arrow" x1="140" y1="185" x2="420" y2="150" stroke="var(--ink)" stroke-width="1.5" opacity="0.6" marker-end="url(#arrow)"/>
+        <text id="tf-label" class="ts" x="150" y="205">전사 인자 접근</text>
+      </svg>
+      <div class="slider-row">
+        <label>화학기 부착</label>
+        <input type="range" id="slider" min="0" max="1" step="1" value="0" oninput="setState(this.value)">
+        <span id="state-label">부착 안 됨</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span> 돌연변이와 후성유전 오류, 무엇이 다른가</h2>
+    <p class="lead">둘 다 유전자 기능을 망가뜨리지만, 되돌릴 수 있는지 여부가 완전히 갈린다. 치료 가능성의 근거가 바로 여기서 나온다.</p>
+    <div class="compare-grid">
+      <div class="box mut">
+        <h3>돌연변이 — 비가역</h3>
+        <ul>
+          <li>염기서열(A·T·G·C 배열) 자체가 바뀜</li>
+          <li>세포가 참조할 원본 서열이 사라짐</li>
+          <li>약물로 서열을 되돌릴 방법이 없음</li>
+        </ul>
+      </div>
+      <div class="box epi">
+        <h3>후성유전 오류 — 가역</h3>
+        <ul>
+          <li>염기서열은 그대로, 화학적 표지만 잘못 붙음</li>
+          <li>메틸기·아세틸기는 붙이거나 뗄 수 있는 표지</li>
+          <li>DNMT·HDAC 저해제로 원상복구 가능</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span> 확장된 이중 적중 모델</h2>
+    <p class="lead">두 대립 유전자에 생기는 오류의 조합은 세 가지다. 모두 같은 결과로 이어지지만, 치료 가능성은 오류의 성격에 따라 달라진다.</p>
+    <div class="card">
+      <svg width="100%" viewBox="0 0 680 380" role="img">
+        <title>확장된 이중 적중 모델</title>
+        <desc>두 대립 유전자에 발생하는 오류의 세 가지 조합이 모두 종양 억제 유전자 기능 상실로 이어지는 과정을 보여주는 다이어그램</desc>
+        <defs>
+          <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+        </defs>
+        <text class="ts" x="40" y="30">대립 유전자 1</text>
+        <text class="ts" x="40" y="150">대립 유전자 2</text>
+
+        <rect x="150" y="14" width="130" height="36" rx="6" fill="var(--coral-bg)" stroke="var(--coral)" stroke-width="1"/>
+        <text class="ts" x="215" y="32" text-anchor="middle" dominant-baseline="central" fill="var(--coral-strong)">돌연변이</text>
+        <rect x="150" y="134" width="130" height="36" rx="6" fill="var(--coral-bg)" stroke="var(--coral)" stroke-width="1"/>
+        <text class="ts" x="215" y="152" text-anchor="middle" dominant-baseline="central" fill="var(--coral-strong)">돌연변이</text>
+        <line x1="290" y1="32" x2="330" y2="70" stroke="var(--ink-mute)" stroke-width="1" marker-end="url(#arrow2)"/>
+        <line x1="290" y1="152" x2="330" y2="90" stroke="var(--ink-mute)" stroke-width="1" marker-end="url(#arrow2)"/>
+
+        <rect x="150" y="72" width="130" height="36" rx="6" fill="var(--amber-bg)" stroke="var(--amber)" stroke-width="1"/>
+        <text class="ts" x="215" y="90" text-anchor="middle" dominant-baseline="central" fill="#633806">돌연변이</text>
+        <rect x="150" y="192" width="130" height="36" rx="6" fill="var(--teal-bg)" stroke="var(--teal)" stroke-width="1"/>
+        <text class="ts" x="215" y="210" text-anchor="middle" dominant-baseline="central" fill="var(--teal-strong)">후성유전 오류</text>
+        <line x1="290" y1="90" x2="330" y2="100" stroke="var(--ink-mute)" stroke-width="1" marker-end="url(#arrow2)"/>
+        <line x1="290" y1="210" x2="330" y2="115" stroke="var(--ink-mute)" stroke-width="1" marker-end="url(#arrow2)"/>
+
+        <rect x="150" y="250" width="130" height="36" rx="6" fill="var(--teal-bg)" stroke="var(--teal)" stroke-width="1"/>
+        <text class="ts" x="215" y="268" text-anchor="middle" dominant-baseline="central" fill="var(--teal-strong)">후성유전 오류</text>
+        <rect x="150" y="308" width="130" height="36" rx="6" fill="var(--teal-bg)" stroke="var(--teal)" stroke-width="1"/>
+        <text class="ts" x="215" y="326" text-anchor="middle" dominant-baseline="central" fill="var(--teal-strong)">후성유전 오류</text>
+        <line x1="290" y1="268" x2="330" y2="130" stroke="var(--ink-mute)" stroke-width="1" marker-end="url(#arrow2)"/>
+        <line x1="290" y1="326" x2="330" y2="150" stroke="var(--ink-mute)" stroke-width="1" marker-end="url(#arrow2)"/>
+
+        <rect x="360" y="60" width="180" height="90" rx="10" fill="var(--paper)" stroke="var(--ink-mute)" stroke-width="1"/>
+        <text class="th" x="450" y="95" text-anchor="middle" dominant-baseline="central">종양 억제 유전자</text>
+        <text class="ts" x="450" y="115" text-anchor="middle" dominant-baseline="central">기능 상실 → 암 발생</text>
+
+        <line x1="540" y1="105" x2="590" y2="105" stroke="var(--ink-mute)" stroke-width="1" marker-end="url(#arrow2)"/>
+        <text class="ts" x="595" y="90">되돌릴 수 없음</text>
+        <text class="ts" x="595" y="108">(돌연변이 부분)</text>
+
+        <rect x="360" y="220" width="180" height="60" rx="8" fill="var(--teal-bg)" stroke="var(--teal)" stroke-width="1"/>
+        <text class="th" x="450" y="242" text-anchor="middle" dominant-baseline="central" fill="var(--teal-strong)">양쪽 모두 후성유전 오류</text>
+        <text class="ts" x="450" y="260" text-anchor="middle" dominant-baseline="central" fill="var(--teal-strong)">약물로 되돌릴 수 있음</text>
+        <line x1="330" y1="150" x2="360" y2="220" stroke="var(--ink-mute)" stroke-width="1" stroke-dasharray="3 3" fill="none"/>
+      </svg>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">04</span> 지문 속 후성유전 항암제 두 가지</h2>
+    <table>
+      <tr><th>약물</th><th>저해 대상</th><th>작용</th><th>결과</th></tr>
+      <tr><td>5-아자사이티딘 계열</td><td>DNMT</td><td>과도한 메틸화 제거</td><td>종양 억제 유전자 전사 회복</td></tr>
+      <tr><td>보리노스타트</td><td>HDAC</td><td>아세틸화 상태 유지</td><td>종양 억제 유전자 발현 촉진 → 세포자살 재가동</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">05</span> mRNA 백신 기사와의 연관성 — 그리고 오해하기 쉬운 지점</h2>
+    <p class="lead">모더나·MSD의 개인맞춤형 흑색종 치료제(인티스메란 오토진 + 키트루다) 3상 성공 기사는 이 지문과 &ldquo;정밀 표적화&rdquo;라는 큰 흐름은 공유하지만, 표적과 원리 자체는 다르다.</p>
+    <table>
+      <tr><th>구분</th><th><span class="tag epi">지문</span>후성유전 항암제</th><th><span class="tag immune">기사</span>mRNA 백신 + 키트루다</th></tr>
+      <tr><td>표적</td><td>암세포 내부의 DNMT·HDAC 효소</td><td>환자의 면역계(T세포)</td></tr>
+      <tr><td>원리</td><td>암세포 자체의 유전자 발현을 복원</td><td>면역세포가 암세포를 인식·공격하도록 유도</td></tr>
+      <tr><td>개인맞춤 여부</td><td>아니오 (범용 약물)</td><td>예 (환자 종양의 신생항원을 매번 새로 설계)</td></tr>
+      <tr><td>가역성 개념과의 관계</td><td>직접 관련 (후성유전 오류를 되돌림)</td><td>관련 없음 (유전자 발현을 되돌리는 게 아님)</td></tr>
+    </table>
+    <div class="callout">
+      <strong>검증 결과 — 같은 기전이 아니다</strong>
+      기사의 &lsquo;인티스메란 오토진&rsquo;은 환자 종양 샘플에서 찾은 신생항원을 최대 34개까지 코딩한 mRNA 기반 개인맞춤 치료제이며, 표준 면역치료제 키트루다(PD-1 억제제)와 병용해 흑색종 수술 후 재발·전이를 줄이는 3상 결과를 낸 것이다. DNMT나 HDAC 같은 후성유전 관련 효소는 관여하지 않는 <strong>면역항암요법(immunotherapy)</strong> 계열이다. 앞서 2상에서는 재발·사망 위험 49%, 원격전이·사망 위험 59% 감소가 보고됐다.
+      <div class="source">출처: 의학신문·일간보사, 비즈워치, 인사이트코리아 (2026.08.20 보도)</div>
+    </div>
+    <p style="margin-top:20px;">그럼에도 두 사례를 하나로 묶어 가르칠 수 있는 지점은 있다. 기존 항암제가 &ldquo;빠르게 분열하는 세포는 무차별 공격&rdquo;하는 방식이었다면, 후성유전 약물은 &ldquo;암세포의 발현 스위치를 되돌리는&rdquo; 방식으로, mRNA 백신+면역항암제는 &ldquo;환자 면역계를 정밀 조준시키는&rdquo; 방식으로 발전해왔다 — 즉 <strong>같은 기전이 아니라, 같은 방향(표적의 정밀도 상승)으로 나아가는 서로 다른 두 갈래</strong>라는 게 정확한 설명이다.</p>
+  </section>
+
+  <footer>
+    본 자료는 EBS 수능특강 국어영역 지문(후성유전학과 항암 치료)과 2026년 8월 보도된 모더나·MSD mRNA 흑색종 백신 임상 3상 기사를 바탕으로 제작한 수업 보조자료다.
+  </footer>
+
+</div>
+
+<script>
+let mode = 'meth';
+function setMode(m){
+  mode = m;
+  document.getElementById('btn-meth').classList.toggle('active', m==='meth');
+  document.getElementById('btn-acet').classList.toggle('active', m==='acet');
+  setState(document.getElementById('slider').value);
+}
+function setState(v){
+  const on = v == '1';
+  const marks = document.getElementById('marks');
+  const rect = document.getElementById('gene-rect');
+  const title = document.getElementById('gene-title');
+  const sub = document.getElementById('gene-sub');
+  const arrow = document.getElementById('tf-arrow');
+  const tfLabel = document.getElementById('tf-label');
+  const label = document.getElementById('state-label');
+  let dots = '';
+  const dotColor = mode === 'meth' ? 'var(--coral)' : 'var(--teal)';
+  if(mode==='meth'){
+    label.textContent = on ? '메틸기 부착됨' : '메틸기 없음';
+  } else {
+    label.textContent = on ? '아세틸기 부착됨' : '아세틸기 없음';
+  }
+  for(let i=0;i<5;i++){
+    const x = 140 + i*40;
+    dots += '<circle cx="'+x+'" cy="150" r="'+(on?7:0)+'" fill="'+dotColor+'" stroke="var(--ink)" stroke-width="0.5"/>';
+  }
+  marks.innerHTML = dots;
+  const suppressed = (mode==='meth' && on) || (mode==='acet' && !on);
+  rect.setAttribute('fill', suppressed ? 'var(--coral-bg)' : 'var(--teal-bg)');
+  rect.setAttribute('stroke', suppressed ? 'var(--coral)' : 'var(--teal)');
+  title.setAttribute('fill', suppressed ? 'var(--coral-strong)' : 'var(--teal-strong)');
+  sub.setAttribute('fill', suppressed ? 'var(--coral-strong)' : 'var(--teal-strong)');
+  title.textContent = suppressed ? '유전자 억제됨' : '유전자 발현됨';
+  sub.textContent = suppressed ? '전사 차단' : '전사 활성';
+  arrow.style.opacity = suppressed ? '0.15' : '0.8';
+  tfLabel.textContent = suppressed ? '전사 인자 접근 차단' : '전사 인자 접근 가능';
+}
+setMode('meth');
+</script>
+</body>
+</html>

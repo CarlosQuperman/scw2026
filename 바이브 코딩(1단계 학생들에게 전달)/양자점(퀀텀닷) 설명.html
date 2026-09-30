@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>양자점(퀀텀닷) — 크기가 색을 정한다</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- 토큰 ---------- */
+:root{
+  --bg:#0c1120;
+  --bg2:#131a2b;
+  --panel:#182034;
+  --line:#26314b;
+  --text:#e9edf6;
+  --muted:#9ba6bf;
+  --red:#ff5a4e;
+  --green:#3ef08a;
+  --blue:#4d8dff;
+  --amber:#f2b544;
+  --serif:'Gowun Batang', 'Noto Serif KR', serif;
+  --sans:'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;line-height:1.75;font-size:16.5px;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.3;margin:0}
+h2{font-size:1.75rem;margin:0 0 .4rem}
+h3{font-size:1.2rem;margin:0 0 .5rem}
+p{margin:.5rem 0 1rem}
+strong{font-weight:500;color:#fff}
+a{color:var(--blue)}
+.wrap{max-width:900px;margin:0 auto;padding:0 20px}
+section{padding:64px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+.lead{color:var(--muted);font-size:1.02rem}
+.kicker{font-family:var(--serif);color:var(--amber);font-size:.95rem;margin-bottom:.3rem}
+.note{background:var(--panel);border-left:3px solid var(--amber);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:.95rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+@media (max-width:720px){.two{grid-template-columns:1fr}}
+.fig{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:18px;margin:18px 0}
+.fig svg,.fig canvas{display:block;width:100%;height:auto}
+.caption{color:var(--muted);font-size:.88rem;margin-top:8px}
+.ctrl{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:10px 0 4px;font-size:.92rem}
+.ctrl label{color:var(--muted)}
+input[type=range]{accent-color:var(--amber);width:min(320px,100%)}
+button{font-family:var(--sans);font-weight:500;font-size:.9rem;background:#22304f;color:#fff;border:1px solid #35476d;border-radius:8px;padding:7px 14px;cursor:pointer}
+button:hover{background:#2c3d63}
+button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+button.on{background:var(--amber);color:#1a1200;border-color:var(--amber)}
+.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.8rem;color:var(--muted);margin-right:6px}
+
+/* ---------- 상단 내비 ---------- */
+nav{position:sticky;top:0;z-index:10;background:rgba(12,17,32,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:4px;overflow-x:auto;padding:8px 20px;scrollbar-width:none}
+nav a{color:var(--muted);text-decoration:none;font-size:.85rem;padding:6px 10px;border-radius:6px;white-space:nowrap}
+nav a:hover{color:#fff;background:var(--panel)}
+
+/* ---------- 히어로 ---------- */
+.hero{padding:72px 0 56px;border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-.01em}
+.hero .sub{font-size:1.05rem;color:var(--muted);max-width:560px}
+.dotstage{position:relative;height:300px;display:grid;place-items:center;margin:20px 0 6px}
+.qd{width:60px;height:60px;border-radius:50%;background:#fff;transition:width .25s,height .25s,background .25s,box-shadow .25s}
+.readout{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;margin-top:8px}
+.readout div{background:var(--panel);border-radius:10px;padding:10px 6px}
+.readout b{display:block;font-size:1.4rem;font-weight:500;color:#fff;font-variant-numeric:tabular-nums}
+.readout span{font-size:.8rem;color:var(--muted)}
+.gapbar{height:10px;border-radius:6px;background:#26314b;position:relative;margin:14px 0 4px;overflow:hidden}
+.gapbar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;transition:width .25s,background .25s}
+
+/* ---------- 개념 지도 ---------- */
+.map{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:14px}
+.map a{display:block;text-decoration:none;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:.9rem}
+.map a small{display:block;color:var(--muted);font-size:.78rem;margin-top:3px}
+.map a:hover{border-color:var(--amber)}
+
+/* ---------- 지문 ---------- */
+.passage{font-family:var(--serif);font-size:1.05rem;line-height:2;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:26px 28px}
+.passage p{margin:0 0 1.2em;text-indent:1em}
+.w{border-bottom:2px dotted var(--amber);cursor:help;position:relative;color:#fff}
+.w:hover::after,.w:focus::after{content:attr(data-m);position:absolute;left:0;top:1.9em;background:#fff;color:#1a1a1a;font-family:var(--sans);font-size:.82rem;line-height:1.5;padding:8px 12px;border-radius:8px;width:max-content;max-width:280px;z-index:5;text-indent:0;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.mk{background:rgba(242,181,68,.18);padding:0 3px;border-radius:3px}
+.mkA{background:rgba(77,141,255,.22);padding:0 3px;border-radius:3px}
+
+/* ---------- 표 ---------- */
+table{width:100%;border-collapse:collapse;font-size:.9rem;margin:14px 0}
+th,td{border:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{background:var(--panel);font-weight:500;color:#fff}
+td:first-child{color:#fff;font-weight:500;white-space:nowrap}
+.tblwrap{overflow-x:auto}
+
+/* ---------- 카드 ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:14px}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card h3{font-size:1.05rem}
+.card .tag{font-size:.78rem;color:var(--amber);font-family:var(--serif)}
+.card ul{margin:.4rem 0 0;padding-left:1.1rem;font-size:.92rem}
+.card li{margin:.25rem 0}
+
+/* ---------- 연관성 ---------- */
+.link{display:grid;grid-template-columns:1fr 32px 1fr;gap:10px;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0;font-size:.93rem}
+.link .from{font-family:var(--serif);color:#fff}
+.link .arrow{color:var(--amber);text-align:center;font-size:1.3rem}
+@media (max-width:600px){.link{grid-template-columns:1fr}.link .arrow{text-align:left}}
+
+/* ---------- 퀴즈 ---------- */
+.q{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+.q .ans{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);color:var(--muted);font-size:.93rem}
+.q.open .ans{display:block}
+.q button{margin-top:8px;font-size:.82rem;padding:5px 12px}
+
+/* ---------- 스택 도식 ---------- */
+.stack{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:720px){.stack{grid-template-columns:1fr}}
+.stack .fig{margin:0}
+.stack h3{font-size:1rem;text-align:center;margin-bottom:6px}
+footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem}
+footer ol{padding-left:1.2rem}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a href="#map">개념 지도</a><a href="#band">에너지 밴드</a><a href="#emit">흡수·방출</a><a href="#size">크기와 색</a><a href="#spec">파장 순도</a><a href="#struct">코어·셸·리간드</a><a href="#ratio">표면적/부피</a><a href="#cd">친환경 소재</a><a href="#text">지문 원문</a><a href="#disp">LCD·OLED·QD</a><a href="#bridge">지문↔산업</a><a href="#demand">B2B·B2C</a><a href="#research">연구 경향</a><a href="#quiz">확인 문제</a>
+</div></nav>
+
+<!-- ============ 히어로 ============ -->
+<header class="hero"><div class="wrap">
+  <div class="kicker">비문학 · 과학기술 지문 시각화</div>
+  <h1>양자점, 크기가 색을 정한다</h1>
+  <p class="sub">같은 물질인데 입자가 몇 나노미터인지에 따라 파란빛도, 붉은빛도 낸다. 지문 전체가 이 한 문장을 설명하는 데 바쳐져 있다. 아래 슬라이더를 움직여 보자.</p>
+
+  <div class="fig">
+    <div class="dotstage"><div class="qd" id="qd"></div></div>
+    <div class="ctrl">
+      <label for="sizeR">입자 지름</label>
+      <input type="range" id="sizeR" min="2" max="8" step="0.1" value="4">
+      <span class="pill" id="sizeLbl">4.0 nm</span>
+    </div>
+    <div class="gapbar"><i id="gapFill"></i></div>
+    <div class="caption">막대 = 전자 에너지 변동 폭(방출되는 빛 에너지). 작을수록 폭이 커진다.</div>
+    <div class="readout">
+      <div><b id="rSize">4.0 nm</b><span>입자 크기</span></div>
+      <div><b id="rGap">2.36 eV</b><span>에너지 변동 폭</span></div>
+      <div><b id="rWl">525 nm</b><span>빛의 파장</span></div>
+    </div>
+    <div class="caption">수치는 설명용 근사값(CdSe 계열 양자점 기준의 경향)이며, 실제 값은 물질과 셸 구조에 따라 다르다.</div>
+  </div>
+</div></header>
+
+<!-- ============ 개념 지도 ============ -->
+<section id="map"><div class="wrap">
+  <h2>지문의 논리 흐름</h2>
+  <p class="lead">지문은 "원자 하나 → 물질 → 나노 입자 → 디스플레이 → 소재 안정성 → 친환경"으로 스케일을 좁혔다가 넓히며 전개된다. 각 칸을 누르면 해당 개념으로 이동한다.</p>
+  <div class="map">
+    <a href="#band">① 에너지 준위 → 밴드<small>원자가 모이면 값이 범위가 된다</small></a>
+    <a href="#emit">② 흡수와 방출<small>전자가 오르내리며 빛을 낸다</small></a>
+    <a href="#size">③ 크기 → 변동 폭 → 색<small>양자점의 핵심 성질</small></a>
+    <a href="#spec">④ 좁은 파장 = 원색<small>왜 화질이 좋아지나</small></a>
+    <a href="#struct">⑤ 코어·셸·리간드<small>작은 것을 지키는 껍질</small></a>
+    <a href="#ratio">⑥ 표면적/부피 비<small>작을수록 표면이 중요한 이유</small></a>
+    <a href="#cd">⑦ 카드뮴에서 갈륨·인으로<small>독성 해결과 남은 과제</small></a>
+  </div>
+</div></section>
+
+<!-- ============ ① 에너지 밴드 ============ -->
+<section id="band"><div class="wrap">
+  <div class="kicker">개념 ①</div>
+  <h2>에너지 준위가 에너지 밴드가 되는 과정</h2>
+  <div class="two">
+    <div>
+      <p>원자 하나에서 전자는 <strong>정해진 궤도</strong>에만 있을 수 있고, 궤도마다 에너지 값이 딱 정해져 있다. 이것이 <strong>에너지 준위</strong>다.</p>
+      <p>원자가 여러 개 모이면 궤도끼리 <strong>ⓐ중첩</strong>되어 전자들이 서로 영향을 주고, 하나의 값이었던 준위가 조금씩 어긋나며 <strong>범위</strong>로 퍼진다. 이렇게 퍼진 범위가 <strong>에너지 밴드</strong>다.</p>
+      <p>보통 물질은 원자 수가 어마어마하게 많으므로 대부분 밴드를 갖는다. 반대로 원자 수가 적으면 밴드가 좁아진다 — 이것이 뒤에 나올 양자점의 복선이다.</p>
+    </div>
+    <div class="fig">
+      <svg id="bandSvg" viewBox="0 0 420 300" aria-label="원자 수에 따른 에너지 준위 변화"></svg>
+      <div class="ctrl">
+        <label for="atomR">원자 수</label>
+        <input type="range" id="atomR" min="1" max="40" step="1" value="1">
+        <span class="pill" id="atomLbl">1개</span>
+      </div>
+      <div class="caption">원자가 늘수록 같은 준위의 선들이 서로 어긋나 하나의 띠(밴드)를 이룬다.</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ ② 흡수와 방출 ============ -->
+<section id="emit"><div class="wrap">
+  <div class="kicker">개념 ②</div>
+  <h2>전자는 에너지를 얻으면 바깥으로, 잃으면 안쪽으로</h2>
+  <div class="two">
+    <div class="fig">
+      <svg id="emitSvg" viewBox="0 0 420 320" aria-label="전자의 흡수와 방출"></svg>
+      <div class="ctrl">
+        <button id="supplyBtn">에너지 공급</button>
+        <span class="pill" id="emitState">준비</span>
+      </div>
+      <div class="caption">공급 → 바깥 궤도로 이동 → 빛을 내며 안쪽으로 복귀. 오르내린 높이 차이가 곧 빛 에너지다.</div>
+    </div>
+    <div>
+      <p>전자는 <strong>낮은 에너지 상태</strong>가 되려는 성질이 있다. 발광 물질에 에너지를 주면 전자가 바깥쪽 궤도로 올라갔다가, 다시 내려오면서 그 차이만큼을 <strong>빛 에너지로 ⓑ방출</strong>한다.</p>
+      <p>핵심은 <strong>"얼마나 내려오느냐"</strong>다. 변동 폭이 크면 빛 에너지가 크고(파장이 짧고, 푸른 계열), 작으면 빛 에너지가 작다(파장이 길고, 붉은 계열).</p>
+      <div class="note">밴드를 가진 물질은 전자가 "밴드에서 밴드로" 내려오므로 변동 폭 자체가 하나의 값이 아니라 <strong>범위</strong>가 된다. 이것이 개념 ④의 문제로 이어진다.</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ ③ 크기와 색 ============ -->
+<section id="size"><div class="wrap">
+  <div class="kicker">개념 ③</div>
+  <h2>나노미터가 되면 규칙이 바뀐다</h2>
+  <div class="two">
+    <div>
+      <p>입자가 나노미터(10억분의 1 m) 단위로 작아지면 전자의 에너지 준위 구조가 달라져 변동 폭이 바뀐다. 반도체 성질을 가진 이런 나노 입자가 <strong>양자점</strong>이다.</p>
+      <p>지문이 주는 규칙은 단순하다.</p>
+      <table>
+        <tr><th>입자 크기</th><th>변동 폭</th><th>빛 에너지</th><th>파장</th><th>색</th></tr>
+        <tr><td>작다</td><td>크다</td><td>크다</td><td>짧다</td><td style="color:var(--blue)">푸른 계열</td></tr>
+        <tr><td>크다</td><td>작다</td><td>작다</td><td>길다</td><td style="color:var(--red)">붉은 계열</td></tr>
+      </table>
+      <p>물질을 바꾸지 않고 <strong>크기만 조절해서</strong> 색을 고르는 것이 양자점의 특징이다. 히어로의 슬라이더가 바로 이 표를 움직이는 것이다.</p>
+    </div>
+    <div class="fig">
+      <svg viewBox="0 0 420 260" aria-label="크기별 양자점과 방출색">
+        <defs>
+          <radialGradient id="gB"><stop offset="0" stop-color="#9dc0ff"/><stop offset=".55" stop-color="#4d8dff"/><stop offset="1" stop-color="#4d8dff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="gG"><stop offset="0" stop-color="#c9ffde"/><stop offset=".55" stop-color="#3ef08a"/><stop offset="1" stop-color="#3ef08a" stop-opacity="0"/></radialGradient>
+          <radialGradient id="gR"><stop offset="0" stop-color="#ffc0b8"/><stop offset=".55" stop-color="#ff5a4e"/><stop offset="1" stop-color="#ff5a4e" stop-opacity="0"/></radialGradient>
+        </defs>
+        <g font-family="Noto Sans KR" font-size="12" fill="#9ba6bf" text-anchor="middle">
+          <circle cx="80" cy="110" r="46" fill="url(#gB)"/><circle cx="80" cy="110" r="10" fill="#fff"/>
+          <text x="80" y="190">약 2~3 nm</text><text x="80" y="208" fill="#4d8dff">변동 폭 큼 · 파랑</text>
+          <circle cx="210" cy="110" r="52" fill="url(#gG)"/><circle cx="210" cy="110" r="16" fill="#fff"/>
+          <text x="210" y="190">약 3~4 nm</text><text x="210" y="208" fill="#3ef08a">중간 · 초록</text>
+          <circle cx="340" cy="110" r="58" fill="url(#gR)"/><circle cx="340" cy="110" r="24" fill="#fff"/>
+          <text x="340" y="190">약 5~7 nm</text><text x="340" y="208" fill="#ff5a4e">변동 폭 작음 · 빨강</text>
+          <text x="210" y="245" font-size="11">흰 원 = 입자 실제 크기(과장), 빛무리 = 방출되는 색</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ ④ 파장 순도 ============ -->
+<section id="spec"><div class="wrap">
+  <div class="kicker">개념 ④</div>
+  <h2>왜 양자점이 "원색에 가까운" 빛을 내는가</h2>
+  <p class="lead">디스플레이는 빨강·초록·파랑을 섞어 색을 만든다. 세 원색이 얼마나 순수한지가 화질을 결정한다.</p>
+  <div class="fig">
+    <canvas id="specCv" width="860" height="300" aria-label="방출 파장 분포 비교"></canvas>
+    <div class="ctrl">
+      <button class="on" data-mode="bulk" id="mBulk">에너지 밴드 물질(기존 발광체)</button>
+      <button data-mode="qd" id="mQd">양자점</button>
+      <button data-mode="both" id="mBoth">겹쳐 보기</button>
+    </div>
+    <div class="caption">가로축 = 파장(nm), 세로축 = 빛의 세기. 넓은 봉우리는 옆 색과 겹쳐 색이 탁해지고, 좁은 봉우리는 의도한 색만 집중된다.</div>
+  </div>
+  <div class="two">
+    <div>
+      <h3>기존 물질의 문제</h3>
+      <p>수많은 원자로 이루어진 물질은 넓은 밴드를 형성하고, 전자가 밴드에서 밴드로 이동하므로 방출 파장이 <strong>넓은 범위</strong>가 된다. 원하는 색 옆에 <strong>비슷한 다른 색</strong>이 섞여 나온다. 게다가 밴드 <strong>안에서</strong> 전자가 움직이며 에너지가 <strong>열</strong>로 새어 발광 효율이 떨어진다.</p>
+    </div>
+    <div>
+      <h3>양자점의 해법</h3>
+      <p>양자점은 원자 수가 적어 밴드가 좁고, 따라서 <strong>아주 좁은 범위의 파장</strong>만 낸다. 의도한 파장을 집중적으로 방출하고 그 외는 적게 내니 원색에 가깝다. Ⓐ양자점 디스플레이가 <strong>색 섞임과 열 발생을 ⓒ현저하게 줄인다</strong>는 문장은 이 두 문제에 각각 대응한다.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ ⑤ 구조 ============ -->
+<section id="struct"><div class="wrap">
+  <div class="kicker">개념 ⑤</div>
+  <h2>코어·셸·리간드 — 작은 것을 지키는 껍질</h2>
+  <div class="two">
+    <div class="fig">
+      <svg id="qdSvg" viewBox="0 0 420 340" aria-label="양자점 구조"></svg>
+      <div class="caption">각 층에 마우스를 올리거나 눌러 보자.</div>
+    </div>
+    <div>
+      <div class="card" id="layerCard">
+        <div class="tag" id="layerTag">층을 선택</div>
+        <h3 id="layerName">양자점의 3층 구조</h3>
+        <p id="layerDesc" style="margin:0;font-size:.95rem">발광을 담당하는 코어, 코어를 덮는 무기물 셸, 셸에 붙는 유기 화합물 리간드로 이루어진다.</p>
+      </div>
+      <table style="margin-top:14px">
+        <tr><th>층</th><th>재질</th><th>역할</th></tr>
+        <tr><td>코어</td><td>반도체(예: 카드뮴·셀레늄, 인듐·인)</td><td>발광</td></tr>
+        <tr><td>셸</td><td>무기물, 단단함</td><td>온도·습도 손상 방지, 발광 효율 유지, 수명 ⓓ연장</td></tr>
+        <tr><td>리간드</td><td>유기 화합물</td><td>셸에 붙어 안정화·성능 향상, 뭉침 방지</td></tr>
+      </table>
+      <p style="font-size:.93rem">코어가 공기·수분에 노출되면 <strong>산화</strong>되고, 빛에 계속 노출되면 <strong>광 퇴색</strong>(빛에 닿아 색이 바램)이 일어난다. 셸과 리간드가 이를 막고, 나아가 코어 원소(카드뮴)의 <strong>독성</strong>으로부터 사람과 환경을 지킨다.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ ⑥ 표면적/부피 ============ -->
+<section id="ratio"><div class="wrap">
+  <div class="kicker">개념 ⑥</div>
+  <h2>㉠ 왜 작은 입자일수록 표면층이 중요한가</h2>
+  <div class="two">
+    <div>
+      <p>지문은 정육면체 예시로 답한다. 한 변 10 m → 1 m로 줄면 <strong>부피는 1,000배</strong> 줄지만 <strong>표면적은 100배</strong>만 준다. 즉 작아질수록 <strong>부피 대비 표면적의 비율</strong>이 커진다.</p>
+      <p>양자점은 그 극단이다. 입자의 상당 부분이 "표면"이므로, 표면에서 벌어지는 산화·퇴색·결함이 곧 전체 성능을 좌우한다. 그래서 표면을 덮는 셸·리간드가 코어의 성능을 결정적으로 좌우한다.</p>
+      <div class="note">문제 유형 힌트: "표면적이 줄어드는 비율이 부피가 줄어드는 비율보다 <strong>낮다</strong>"는 문장을 "표면적이 더 많이 줄어든다"로 뒤집어 읽게 하는 선지가 자주 나온다.</div>
+    </div>
+    <div class="fig">
+      <svg id="cubeSvg" viewBox="0 0 420 260" aria-label="정육면체 크기에 따른 표면적과 부피"></svg>
+      <div class="ctrl">
+        <label for="edgeR">한 변의 길이</label>
+        <input type="range" id="edgeR" min="1" max="10" step="1" value="10">
+        <span class="pill" id="edgeLbl">10 m</span>
+      </div>
+      <div class="readout">
+        <div><b id="rV">1,000</b><span>부피 (m³)</span></div>
+        <div><b id="rS">600</b><span>표면적 (m²)</span></div>
+        <div><b id="rSV">0.6</b><span>표면적 ÷ 부피</span></div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ ⑦ 친환경 ============ -->
+<section id="cd"><div class="wrap">
+  <div class="kicker">개념 ⑦</div>
+  <h2>카드뮴을 빼면 무엇이 어려워지는가</h2>
+  <div class="fig">
+    <svg viewBox="0 0 860 230" aria-label="카드뮴 대체 연구 흐름">
+      <g font-family="Noto Sans KR" font-size="13" fill="#e9edf6">
+        <rect x="10" y="30" width="200" height="80" rx="10" fill="#182034" stroke="#ff5a4e"/>
+        <text x="110" y="62" text-anchor="middle" font-weight="500">카드뮴 코어</text>
+        <text x="110" y="86" text-anchor="middle" fill="#9ba6bf" font-size="12">성능 좋음 · 독성 · 환경 오염</text>
+        <path d="M215 70 H285" stroke="#f2b544" stroke-width="2" marker-end="url(#ar)"/>
+        <rect x="290" y="30" width="200" height="80" rx="10" fill="#182034" stroke="#3ef08a"/>
+        <text x="390" y="62" text-anchor="middle" font-weight="500">갈륨·인 코어</text>
+        <text x="390" y="86" text-anchor="middle" fill="#9ba6bf" font-size="12">독성 적음 · 결합력 약함</text>
+        <path d="M495 70 H565" stroke="#f2b544" stroke-width="2" marker-end="url(#ar)"/>
+        <rect x="570" y="10" width="280" height="120" rx="10" fill="#182034" stroke="#26314b"/>
+        <text x="710" y="38" text-anchor="middle" font-weight="500">합성이 어렵다</text>
+        <text x="710" y="62" text-anchor="middle" fill="#9ba6bf" font-size="12">반응성 높은 물질을 ⓔ첨가하거나</text>
+        <text x="710" y="82" text-anchor="middle" fill="#9ba6bf" font-size="12">매우 높은 온도에서 합성해야 함</text>
+        <text x="710" y="108" text-anchor="middle" fill="#9ba6bf" font-size="12">+ 성능 저하 · 수명 짧음</text>
+        <path d="M710 135 V165" stroke="#f2b544" stroke-width="2" marker-end="url(#ar)"/>
+        <rect x="430" y="170" width="420" height="48" rx="10" fill="#22304f" stroke="#f2b544"/>
+        <text x="640" y="199" text-anchor="middle" font-weight="500">해결 방향: 리간드를 최적 상태로 만드는 기술 개발</text>
+        <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#f2b544"/></marker></defs>
+      </g>
+    </svg>
+  </div>
+  <p>양자점 코어는 원소들을 섞어 <strong>가열</strong>할 때 일어나는 화학 반응으로 만든다. 갈륨·인은 카드뮴보다 결합력이 약해 합성 조건이 까다롭고, 성능과 수명도 아직 뒤진다. 그래서 지문은 코어 자체가 아니라 코어를 감싸는 <strong>리간드</strong>에서 답을 찾는 흐름으로 끝난다. 개념 ⑤·⑥이 여기서 다시 쓰인다 — 작은 입자에서는 표면이 전부이기 때문이다.</p>
+</div></section>
+
+<!-- ============ 지문 원문 ============ -->
+<section id="text"><div class="wrap">
+  <div class="kicker">지문 원문</div>
+  <h2>주석 달린 본문</h2>
+  <p class="lead">ⓐ~ⓔ 어휘에 마우스를 올리면 뜻이 뜬다. ㉠과 Ⓐ는 색으로 표시했다.</p>
+  <div class="passage">
+    <p>원자에는 중심에 핵이 있고, 핵 주위에 동심원처럼 퍼져 있는 특정 궤도들을 도는 전자들이 있다. 이 궤도마다 전자가 갖는 에너지 값이 정해져 있는데, 이 값을 에너지 준위라고 한다. 원자가 가진 특정한 몇 개의 궤도에만 전자가 존재하므로, 전자가 가질 수 있는 에너지 준위도 특정한 값으로 정해져 있다. 전자는 에너지를 얻으면 바깥쪽 궤도로, 에너지를 잃으면 안쪽 궤도로 이동한다. 원자가 하나일 때는 전자의 에너지 준위가 특정한 값이지만, 여러 원자가 모이면 여러 원자들의 궤도가 <span class="w" tabindex="0" data-m="ⓐ 중첩(重疊): 거듭 겹치거나 포개어짐. → 여기서는 궤도가 서로 겹침">ⓐ중첩</span>되면서 전자들이 서로 영향을 미쳐 에너지 준위에 변화가 생긴다. 이로 인해 에너지 준위는 특정한 값이 아닌 일정한 범위로 나타나게 된다. 이렇게 에너지 값이 범위로 표현된 것을 에너지 밴드라고 한다. 보통의 물질들은 수많은 원자로 구성돼 있기 때문에 대부분 에너지 밴드를 갖고 있다. 전자는 낮은 에너지 상태가 되려는 성질이 있으므로, 발광 물질의 전자에 에너지가 공급되면 전자가 바깥쪽으로 이동한 뒤 다시 빛에너지를 <span class="w" tabindex="0" data-m="ⓑ 방출(放出): 비축한 것을 내놓음. 물리에서는 에너지나 입자를 밖으로 내보냄">ⓑ방출</span>하면서 안쪽으로 이동하며 에너지 값이 변한다. 수많은 원자로 이루어진 물질은 전자들이 높은 에너지 밴드에서 낮은 에너지 밴드로 이동하기 때문에 에너지 변동 폭이 특정한 값이 아닌 일정한 범위를 이루게 된다.</p>
+    <p>에너지가 공급되었을 때 전자의 에너지가 변동되는 폭이 클수록 방출되는 빛 에너지가 크고 변동 폭에 따라 빛의 색이 다르다. 그런데 물질의 입자 크기가 나노미터(nm) 단위로 작아지면 물질의 전자 에너지 준위 구조가 달라져, 전자 에너지 변동 폭에 변화가 생긴다. 반도체 성질을 가진 나노미터 크기의 입자를 양자점이라고 하는데, 양자점은 크기에 따라 다른 색을 나타낸다. 일반적으로 나노미터 크기의 입자에 에너지가 공급되었을 때, 입자의 크기가 작을수록 전자의 에너지가 변동되는 폭이 크다. 이때 변동 폭이 클수록 푸른 계열의 빛을, 작을수록 붉은 계열의 빛을 낸다.</p>
+    <p>발광 물질의 에너지 변동 폭이 일정하지 않으면 선명한 디스플레이를 구현하기 어려워진다. 디스플레이는 빛의 삼원색인 빨강, 초록, 파랑의 색을 합쳐서 특정 색을 만들어 내는데, 삼원색이 얼마나 원색에 가까운지가 화질을 좌우하는 중요 요소이다. 전자가 방출하는 빛 에너지가 클수록 파장이 짧고, 작을수록 파장이 긴데, 수많은 원자로 이루어진 물질은 전자들이 넓은 에너지 밴드를 형성하기 때문에 전자들이 에너지 밴드에서 다른 밴드로 이동하며 빛 에너지를 방출한다. 따라서 방출되는 빛의 파장이 특정한 값이 아닌 넓은 범위가 된다. 이 때문에 나타내고자 하는 색의 파장뿐 아니라 비슷한 다른 색의 파장이 섞여서 나오는 문제가 있다. 하지만 양자점은 적은 수의 원자로 이루어져 있기 때문에 아주 좁은 범위의 파장을 갖는 빛을 낼 수 있다. 따라서 의도한 파장에 가까운 빛을 집중적으로 방출하고 그 외의 빛은 적게 방출함으로써 원색에 가까운 빛을 발할 수 있다. 한편 에너지 밴드 내에서 전자들이 이동할 때는 전자의 에너지 변동으로 인해 열이 방출되면서 발광 효율이 떨어질 수 있다. 에너지 밴드를 갖는 발광 물질을 활용한 LCD와 같은 디스플레이는 다른 파장의 빛이 뒤섞이거나 열이 발생하는 경우가 많은데, <span class="mkA">Ⓐ양자점 디스플레이</span>는 이러한 현상을 <span class="w" tabindex="0" data-m="ⓒ 현저(顯著)하게: 뚜렷이 드러날 정도로">ⓒ현저하게</span> 줄일 수 있다. 이로 인해 뛰어난 화질을 구현하면서도 발열을 줄일 수 있어 신소재로 주목받고 있다.</p>
+    <p>양자점은 발광을 담당하는 코어, 코어를 덮는 단단한 껍질인 셸, 주로 셸에 붙는 유기 화합물인 리간드로 이루어져 있다. 무기물로 이루어진 셸은 온도나 습도에 의한 손상을 막아 발광 효율을 유지하고 양자점의 수명을 <span class="w" tabindex="0" data-m="ⓓ 연장(延長): 시간이나 거리를 본래보다 늘림">ⓓ연장</span>하며, 리간드는 셸에 붙어 안정화와 성능 향상에 영향을 미친다. 코어가 공기나 수분에 노출될 경우 산화될 수 있고, 빛에 지속적으로 노출되면 색을 가진 물체에 빛이 닿아서 퇴색하는 현상인 광 퇴색이 발생하여 양자점이 선명한 색을 띠지 못하게 될 수 있는데, 리간드와 셸이 이러한 현상을 막는 역할을 한다. 양자점과 같이 표면층이 중심부를 보호하는 구조를 가진 경우는 많지만, <span class="mk">㉠양자점은 크기가 큰 입자들에 비해 특히 표면층의 중요성이 크다.</span> 이는 물체의 크기에 따라 부피와 표면적의 비가 달라지는 것과 관련이 있다. 예를 들어 한 변이 10m인 정육면체의 부피와 표면적은 각각 1,000m³, 600m²이지만 한 변이 1m인 정육면체는 각각 1m³, 6m²이다. 즉 부피가 1,000배 줄어들 때, 표면적은 100배만 줄어드는 것이다. 이처럼 입자의 크기가 작아질 때, 부피가 줄어드는 비율보다 표면적이 줄어드는 비율이 낮은데, 이로 인해 양자점의 코어가 안정적으로 제 성능을 내는 데 셸과 리간드가 큰 영향을 미친다. 코어의 재료로 사용되는 원소 중 하나인 카드뮴은 독성이 있는데, 셸과 리간드가 코어의 원소로부터 나오는 독성으로부터 사람과 환경을 보호하는 역할을 하기도 한다.</p>
+    <p>최근에는 카드뮴과 같이 인체에 유해하고 환경 오염을 유발하는 물질 대신 갈륨, 인과 같이 독성이 적은 원소를 활용하는 방안이 연구되고 있다. 양자점의 코어는 원소들을 섞어서 가열할 때 발생하는 화학 반응을 통해 만들어지는데, 갈륨이나 인은 상대적으로 결합력이 약하여 반응성이 높은 물질을 <span class="w" tabindex="0" data-m="ⓔ 첨가(添加): 이미 있는 것에 덧붙이거나 보탬">ⓔ첨가</span>하거나 매우 높은 온도에서 합성해야 한다는 어려움이 있다. 또한 기존에 사용되던 원소들에 비해 성능이 떨어지고 수명이 짧다는 단점이 있다. 이러한 문제들을 해결하기 위해 양자점의 특성에 큰 영향을 미치는 리간드를 최적의 상태로 만드는 방법을 개발하고 있다.</p>
+  </div>
+</div></section>
+
+<!-- ============ 디스플레이 비교 ============ -->
+<section id="disp"><div class="wrap">
+  <div class="kicker">확장 ①</div>
+  <h2>LCD · OLED · 양자점 — 빛을 만드는 세 가지 방법</h2>
+  <p class="lead">지문의 "LCD와 같은 디스플레이"와 "양자점 디스플레이"가 실제 제품에서 어떤 구조인지 보자. 핵심 질문은 하나다. <strong>빛은 어디서 나오고, 색은 어디서 정해지는가?</strong></p>
+
+  <div class="stack">
+    <div class="fig">
+      <h3>LCD</h3>
+      <svg viewBox="0 0 220 230" aria-label="LCD 구조">
+        <g font-family="Noto Sans KR" font-size="11" fill="#e9edf6" text-anchor="middle">
+          <rect x="20" y="180" width="180" height="26" rx="4" fill="#3a4a72"/><text x="110" y="197">백라이트(흰 LED)</text>
+          <rect x="20" y="140" width="180" height="26" rx="4" fill="#2b3552"/><text x="110" y="157">액정(빛의 양 조절 셔터)</text>
+          <rect x="20" y="100" width="60" height="26" rx="4" fill="#ff5a4e" opacity=".8"/><rect x="80" y="100" width="60" height="26" rx="4" fill="#3ef08a" opacity=".8"/><rect x="140" y="100" width="60" height="26" rx="4" fill="#4d8dff" opacity=".8"/>
+          <text x="110" y="92" fill="#9ba6bf">컬러 필터(색 걸러내기)</text>
+          <rect x="20" y="30" width="180" height="26" rx="4" fill="#0c1120" stroke="#26314b"/><text x="110" y="47">화면</text>
+          <path d="M60 178 V60 M110 178 V60 M160 178 V60" stroke="#f2b544" stroke-width="1.5" stroke-dasharray="3 3" opacity=".7"/>
+          <text x="110" y="222" fill="#9ba6bf">항상 켜진 빛을 가리고 걸러서 씀</text>
+        </g>
+      </svg>
+    </div>
+    <div class="fig">
+      <h3>OLED</h3>
+      <svg viewBox="0 0 220 230" aria-label="OLED 구조">
+        <g font-family="Noto Sans KR" font-size="11" fill="#e9edf6" text-anchor="middle">
+          <rect x="20" y="180" width="180" height="26" rx="4" fill="#2b3552"/><text x="110" y="197">기판·전극</text>
+          <rect x="20" y="120" width="60" height="46" rx="4" fill="#ff5a4e" opacity=".85"/><rect x="80" y="120" width="60" height="46" rx="4" fill="#3ef08a" opacity=".85"/><rect x="140" y="120" width="60" height="46" rx="4" fill="#4d8dff" opacity=".85"/>
+          <text x="110" y="148" fill="#0c1120" font-weight="500">유기물 화소가 스스로 발광</text>
+          <rect x="20" y="30" width="180" height="26" rx="4" fill="#0c1120" stroke="#26314b"/><text x="110" y="47">화면</text>
+          <text x="110" y="92" fill="#9ba6bf">백라이트 없음 → 꺼진 화소는 완전한 검정</text>
+          <text x="110" y="222" fill="#9ba6bf">화소마다 켜고 끔 · 얇고 휘어짐</text>
+        </g>
+      </svg>
+    </div>
+    <div class="fig">
+      <h3>양자점 (QD-OLED)</h3>
+      <svg viewBox="0 0 220 230" aria-label="QD-OLED 구조">
+        <g font-family="Noto Sans KR" font-size="11" fill="#e9edf6" text-anchor="middle">
+          <rect x="20" y="180" width="180" height="26" rx="4" fill="#2b3552"/><text x="110" y="197">기판·전극</text>
+          <rect x="20" y="140" width="180" height="26" rx="4" fill="#4d8dff" opacity=".85"/><text x="110" y="157" fill="#0c1120" font-weight="500">청색 OLED (빛의 원천)</text>
+          <rect x="20" y="100" width="60" height="26" rx="4" fill="#ff5a4e" opacity=".85"/><rect x="80" y="100" width="60" height="26" rx="4" fill="#3ef08a" opacity=".85"/><rect x="140" y="100" width="60" height="26" rx="4" fill="#4d8dff" opacity=".35"/>
+          <text x="110" y="92" fill="#9ba6bf">양자점 색변환층(청색을 흡수→R·G 방출)</text>
+          <rect x="20" y="30" width="180" height="26" rx="4" fill="#0c1120" stroke="#26314b"/><text x="110" y="47">화면</text>
+          <text x="110" y="222" fill="#9ba6bf">"필터"가 아니라 "변환" → 빛 손실 적음</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <div class="note">헷갈리기 쉬운 이름: 시중의 <strong>"QLED" TV</strong>는 대부분 LCD 백라이트 앞에 양자점 <strong>필름</strong>을 넣어 색순도를 높인 LCD다. <strong>QD-OLED</strong>는 청색 OLED 위에 양자점을 얹은 자발광 방식이고, 지문의 "양자점이 직접 빛을 내는" 이상형에 가장 가까운 <strong>EL-QD(전계발광 양자점)</strong>는 아직 시제품 단계다.</div>
+
+  <div class="tblwrap">
+  <table>
+    <tr><th>구분</th><th>LCD (LED TV)</th><th>QD-LCD (QLED·QNED)</th><th>OLED (WOLED)</th><th>QD-OLED</th></tr>
+    <tr><td>빛의 원천</td><td>흰 LED 백라이트</td><td>청색 LED 백라이트 + QD 필름</td><td>화소 스스로(백색 OLED + 컬러필터)</td><td>화소 스스로(청색 OLED + QD 변환)</td></tr>
+    <tr><td>색 결정 방식</td><td>컬러 필터로 걸러냄</td><td>QD가 청색을 R·G로 변환 후 필터</td><td>컬러 필터로 걸러냄</td><td>QD가 청색을 R·G로 변환</td></tr>
+    <tr><td>검정 표현</td><td>빛샘 있음</td><td>미니LED로 개선, 완전 검정은 아님</td><td>완전한 검정</td><td>완전한 검정</td></tr>
+    <tr><td>색순도·색영역</td><td>보통</td><td>높음</td><td>높음</td><td>가장 넓음</td></tr>
+    <tr><td>밝기</td><td>높음</td><td>가장 높음(밝은 거실 유리)</td><td>중간</td><td>OLED 중 최고(2,000니트대)</td></tr>
+    <tr><td>수명·번인</td><td>강함</td><td>강함</td><td>번인 관리 필요</td><td>번인 관리 필요</td></tr>
+    <tr><td>대표 브랜드·제품</td><td>삼성 Crystal UHD, LG UHD, TCL, 하이센스</td><td>삼성 QLED·Neo QLED, LG QNED, TCL QLED</td><td>LG OLED C·G 시리즈, 소니 브라비아, 파나소닉</td><td>삼성 S90·S95 시리즈, 소니 A95, 델·에일리언웨어 모니터</td></tr>
+    <tr><td>65인치 체감 가격대<br><small style="color:var(--muted)">2026년 국내·미국 판매가 기준</small></td><td>약 60~90만 원</td><td>약 110~160만 원</td><td>약 150~250만 원</td><td>약 250~350만 원</td></tr>
+    <tr><td>패널 제조사</td><td>중국(BOE·CSOT) 중심</td><td>중국 + 삼성·LG</td><td>LG디스플레이</td><td>삼성디스플레이(세계 유일 양산)</td></tr>
+  </table>
+  </div>
+  <p class="caption">가격은 판매 시기·모델·프로모션에 따라 크게 달라진다. 2026년 기준 65인치 LED TV는 80만 원대, QLED는 110만 원대, LG OLED C6는 미국 $1,399부터, 삼성 S95H QD-OLED는 $2,200 안팎에서 판매된 것으로 보도됐다.</p>
+</div></section>
+
+<!-- ============ 지문 ↔ 산업 ============ -->
+<section id="bridge"><div class="wrap">
+  <div class="kicker">확장 ②</div>
+  <h2>지문의 문장이 제품의 어디에 닿는가</h2>
+  <p class="lead">지문의 추상적 서술 하나하나가 실제 산업의 구체적 기술 과제와 대응한다.</p>
+
+  <div class="link"><div class="from">"아주 좁은 범위의 파장 … 원색에 가까운 빛"</div><div class="arrow">↔</div><div>양자점의 방출 스펙트럼 폭(반치폭)이 20~30 nm 수준으로, 기존 형광체(50~100 nm)보다 훨씬 좁다. 이것이 QD TV가 <strong>색영역(BT.2020) 90% 이상</strong>을 광고하는 근거다.</div></div>
+  <div class="link"><div class="from">"열이 방출되면서 발광 효율이 떨어질 수 있다"</div><div class="arrow">↔</div><div>LCD는 백라이트를 항상 켜고 대부분을 가리거나 걸러 버린다. QD는 필터가 아니라 <strong>변환</strong>이라 손실이 적고, 자발광 QD-OLED는 켜야 할 화소만 켜서 <strong>소비전력·발열</strong>이 줄어든다.</div></div>
+  <div class="link"><div class="from">"셸은 온도나 습도에 의한 손상을 막아 … 수명을 연장"</div><div class="arrow">↔</div><div>TV는 10년 이상 써야 한다. 양자점 필름을 <strong>배리어 필름</strong>으로 밀봉하고, 코어/셸 계면을 설계하는 것이 제조사의 핵심 노하우다. 초기 QD TV의 "색 바램" 우려가 이 대목의 실제 사례다.</div></div>
+  <div class="link"><div class="from">"카드뮴은 독성이 있는데 … 갈륨, 인과 같이 독성이 적은 원소"</div><div class="arrow">↔</div><div>EU의 유해물질 제한지침(RoHS)이 카드뮴을 규제하면서, 삼성 등은 <strong>인화인듐(InP)</strong> 양자점으로 전환했다. 지문의 "갈륨·인"은 이 계열(III-V족 반도체)을 가리킨다.</div></div>
+  <div class="link"><div class="from">"리간드를 최적의 상태로 만드는 방법"</div><div class="arrow">↔</div><div>현재 양자점 논문의 상당수가 <strong>리간드 교환·표면 처리</strong> 연구다. 삼성디스플레이가 2026년 SID에서 우수 논문상을 받은 EL-QD 연구도 "표면 처리와 입자 간 거리 조절"이 핵심이었다.</div></div>
+</div></section>
+
+<!-- ============ B2B / B2C ============ -->
+<section id="demand"><div class="wrap">
+  <div class="kicker">확장 ③</div>
+  <h2>누가, 왜 양자점을 원하는가 — B2B와 B2C</h2>
+  <div class="two">
+    <div class="card">
+      <div class="tag">B2B · 산업계의 수요</div>
+      <h3>패널 제조사·소재 회사·완성품 회사의 계산</h3>
+      <ul>
+        <li><strong>차별화</strong>: LCD 패널은 중국이 가격으로 장악했다. 삼성·LG는 OLED와 QD처럼 "따라 만들기 어려운" 기술로 프리미엄 시장을 지킨다.</li>
+        <li><strong>규제 대응</strong>: 카드뮴 규제(RoHS)를 통과하는 무카드뮴 QD가 없으면 유럽에 팔 수 없다. 지문의 "갈륨·인" 연구가 곧 시장 진입권이다.</li>
+        <li><strong>소재 공급망</strong>: 양자점 원료·필름·잉크를 만드는 소재 기업(국내 한솔케미칼, 미국 Nanosys 등)과 패널사가 긴 계약으로 묶인다.</li>
+        <li><strong>다음 시장</strong>: 차량용 디스플레이, 게이밍 모니터, AR/VR 초고해상도 화면은 색순도·저전력·초소형 화소가 필요해 QD가 유리하다.</li>
+        <li><strong>수율과 비용</strong>: 기술이 좋아도 불량률이 높으면 못 판다. QD-OLED가 몇 년째 삼성디스플레이 단독 양산인 이유다.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="tag">B2C · 실소비자의 수요</div>
+      <h3>거실에서 실제로 체감하는 것</h3>
+      <ul>
+        <li><strong>밝은 거실 vs 어두운 방</strong>: 채광 좋은 거실은 밝기가 센 QD-LCD, 영화 위주의 어두운 방은 OLED·QD-OLED가 유리하다. 2026년 국내 비교 기사도 "취향이 아니라 채광 문제"로 정리한다.</li>
+        <li><strong>가격 대비 체감</strong>: 색순도 차이는 HDR 영상·게임에서 두드러지고, 일반 방송에서는 작다. 그래서 65인치 100만 원 안팎의 QD-LCD가 판매량의 중심이다.</li>
+        <li><strong>번인 불안</strong>: 자발광(OLED·QD-OLED)은 같은 화면을 오래 띄우면 자국이 남을 수 있다. 게이머·PC 모니터 사용자가 특히 신경 쓴다.</li>
+        <li><strong>마케팅 용어의 혼란</strong>: QLED·QNED·QD-OLED·Neo QLED가 모두 다르다. 소비자가 "빛이 어디서 나오는가"만 물으면 대부분 정리된다.</li>
+        <li><strong>수명과 친환경</strong>: 오래 써도 색이 바래지 않는지, 유해물질이 없는지가 구매 후기의 단골 항목 — 지문 4·5문단이 소비자 언어로 번역된 셈이다.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ 연구 경향 ============ -->
+<section id="research"><div class="wrap">
+  <div class="kicker">확장 ④</div>
+  <h2>요즘 연구자들은 무엇을 풀고 있나</h2>
+  <p class="lead">2023년 노벨 화학상이 양자점을 발견·합성한 세 과학자(예키모프, 브루스, 바웬디)에게 돌아갔다. 발견은 끝났고, 지금은 "오래 가고, 독성 없고, 스스로 빛나게" 만드는 단계다.</p>
+  <div class="cards">
+    <div class="card"><div class="tag">소재 · 무카드뮴</div><h3>인화인듐(InP) 양자점</h3><p style="font-size:.92rem;margin:0">지문의 "갈륨·인" 계열. 카드뮴보다 독성이 적지만 표면이 민감해 화소 패터닝 중 성능이 떨어지는 문제가 있었다. KAIST 등이 광산 발생기를 이용한 패터닝 기술로 초고해상도(AR/VR용) 패턴을 구현했다.</p></div>
+    <div class="card"><div class="tag">소재 · 신물질</div><h3>페로브스카이트 양자점</h3><p style="font-size:.92rem;margin:0">색순도가 매우 높고(반치폭 약 20 nm 이하) 만들기 쉽지만 수분·열에 약하고 납을 쓴다. 2026년 국내 연구팀은 유기용매 없는 건식 공정으로 반치폭 18 nm, 대기 중 300일 이상 안정한 녹색 발광층을 보고했다 — 지문의 "셸이 손상을 막는다"를 실리카 골격으로 구현한 셈이다.</p></div>
+    <div class="card"><div class="tag">소자 · 자발광</div><h3>EL-QD (전계발광 양자점)</h3><p style="font-size:.92rem;margin:0">현재 QD-OLED는 청색 OLED 빛을 양자점이 <strong>받아서</strong> 색을 바꾸는 광발광(PL) 방식이다. 전기로 양자점을 <strong>직접</strong> 빛내는 EL-QD가 최종 목표. 삼성디스플레이가 2026년 SID에서 18인치 500니트 시제품을 공개했고, 표면 처리·입자 간 거리 조절 논문이 우수 논문상을 받았다.</p></div>
+    <div class="card"><div class="tag">표면 · 리간드</div><h3>리간드 공학</h3><p style="font-size:.92rem;margin:0">지문 마지막 문장 그대로다. 긴 사슬 리간드는 분산은 잘 되지만 전기가 잘 안 통해 EL 소자에 불리하다. 짧은 리간드로 바꾸는 '리간드 교환', 셸과 리간드 사이 결함을 메우는 표면 처리가 효율과 수명을 동시에 끌어올린다.</p></div>
+    <div class="card"><div class="tag">공정 · 패터닝</div><h3>잉크젯·포토 패터닝</h3><p style="font-size:.92rem;margin:0">R·G·B 양자점을 화소마다 정확히 놓아야 한다. 잉크젯으로 찍거나, 빛으로 굳혀 남기는 포토 패터닝이 경쟁 중이다. 패터닝 과정에서 양자점이 손상되지 않게 하는 것이 곧 ⑤·⑥ 개념(표면 보호)의 문제다.</p></div>
+    <div class="card"><div class="tag">응용 · 확장</div><h3>디스플레이 너머</h3><p style="font-size:.92rem;margin:0">같은 "크기로 색을 고르는" 성질이 태양전지(빛 흡수 파장 조절), 바이오 이미징(세포에 색 표지), 이미지 센서, 양자 통신 광원으로 번진다. 2023년 노벨상 발표문이 강조한 것도 이 범용성이었다.</p></div>
+  </div>
+</div></section>
+
+<!-- ============ 퀴즈 ============ -->
+<section id="quiz"><div class="wrap">
+  <div class="kicker">확인 문제</div>
+  <h2>지문을 정확히 읽었는지 점검</h2>
+  <div class="q"><strong>1.</strong> 원자 하나일 때 없던 "에너지 밴드"가 물질에서 생기는 직접적 원인은?<button onclick="this.parentNode.classList.toggle('open')">답 보기</button><div class="ans">여러 원자의 궤도가 중첩되어 전자들이 서로 영향을 미치고, 그 결과 준위가 하나의 값이 아니라 범위로 퍼지기 때문. (1문단)</div></div>
+  <div class="q"><strong>2.</strong> 양자점 입자가 작아지면 빛의 파장은 길어지는가, 짧아지는가?<button onclick="this.parentNode.classList.toggle('open')">답 보기</button><div class="ans">짧아진다. 작을수록 변동 폭↑ → 빛 에너지↑ → 파장↓ → 푸른 계열. (2·3문단)</div></div>
+  <div class="q"><strong>3.</strong> "LCD와 같은 디스플레이"에서 발생하는 두 가지 문제와, 양자점이 이를 줄일 수 있는 이유를 각각 말해 보자.<button onclick="this.parentNode.classList.toggle('open')">답 보기</button><div class="ans">① 다른 파장의 빛이 섞임 — 넓은 밴드 때문. 양자점은 원자 수가 적어 좁은 파장만 냄. ② 열 발생 — 밴드 내부에서 전자가 이동하며 에너지가 열로 빠짐. 양자점은 밴드가 좁아 이런 손실이 적음. (3문단)</div></div>
+  <div class="q"><strong>4.</strong> ㉠의 이유를 부피·표면적 비율로 설명할 때, 어느 쪽이 "덜" 줄어드는가?<button onclick="this.parentNode.classList.toggle('open')">답 보기</button><div class="ans">표면적이 덜 줄어든다(부피 1,000배 ↓, 표면적 100배 ↓). 따라서 작은 입자는 부피에 비해 표면이 상대적으로 커져 표면층의 역할이 커진다. (4문단)</div></div>
+  <div class="q"><strong>5.</strong> 갈륨·인을 코어로 쓸 때의 어려움 두 가지와, 지문이 제시한 해결 방향은?<button onclick="this.parentNode.classList.toggle('open')">답 보기</button><div class="ans">어려움: 결합력이 약해 반응성 높은 물질을 첨가하거나 매우 높은 온도에서 합성해야 함 / 성능이 떨어지고 수명이 짧음. 해결 방향: 리간드를 최적 상태로 만드는 기술 개발. (5문단)</div></div>
+  <div class="q"><strong>6. (확장)</strong> 시중의 "QLED TV"와 "QD-OLED TV"는 빛의 원천이 어떻게 다른가?<button onclick="this.parentNode.classList.toggle('open')">답 보기</button><div class="ans">QLED는 LCD 백라이트(LED)가 빛의 원천이고 양자점 필름이 색을 바꾼다. QD-OLED는 화소마다 청색 OLED가 스스로 빛나고 그 위 양자점이 빨강·초록으로 바꾼다. 백라이트의 유무가 검정 표현과 발열의 차이를 만든다.</div></div>
+</div></section>
+
+<footer><div class="wrap">
+  <p>참고한 자료(2026년 9월 기준)</p>
+  <ol>
+    <li>디일렉·ZDNet Korea, "삼성디스플레이 SID 2026 EL-QD 18인치 500니트 공개, 우수 논문상" (2026.5)</li>
+    <li>아시아경제, "동의대 김성훈 교수팀 건식 공정 페로브스카이트 발광 소재, 반치폭 18 nm·300일 안정" (2026.9)</li>
+    <li>KAIST 뉴스, "친환경 InP 양자점 초고해상도 패터닝 기술"</li>
+    <li>사까마까·리뷰양이, 2026년 65인치 TV 가격·패널 비교 기사 / xthe.com, "OLED vs QLED 2026" (LG C6 $1,399, 삼성 S95H $2,200 등)</li>
+    <li>고려대 주병권 교수 연구실 기고, "양자점 기반 디스플레이 최종 목표를 향하여" (전기산업, 2024)</li>
+  </ol>
+  <p>이 페이지는 학습용이며 수치는 경향을 보여 주는 근사값이다. 지문 원문은 문제지 텍스트를 그대로 옮겼다.</p>
+</div></footer>
+
+<script>
+/* ===== 공통: 파장 → 색 ===== */
+function wlToRgb(wl){
+  let r=0,g=0,b=0;
+  if(wl<440){r=-(wl-440)/60;b=1}
+  else if(wl<490){g=(wl-440)/50;b=1}
+  else if(wl<510){g=1;b=-(wl-510)/20}
+  else if(wl<580){r=(wl-510)/70;g=1}
+  else if(wl<645){r=1;g=-(wl-645)/65}
+  else{r=1}
+  const f=v=>Math.round(255*Math.pow(Math.max(0,v),.8));
+  return [f(r),f(g),f(b)];
+}
+const fmt=n=>n.toLocaleString('ko-KR');
+
+/* ===== 히어로: 크기 슬라이더 ===== */
+(function(){
+  const r=document.getElementById('sizeR'),dot=document.getElementById('qd'),fill=document.getElementById('gapFill');
+  function upd(){
+    const d=+r.value;                       // 2~8 nm
+    const gap=1.74+3.2/(d*d)*1.15;          // 설명용 근사(eV)
+    const wl=1240/gap;                      // nm
+    const [R,G,B]=wlToRgb(Math.min(700,Math.max(400,wl)));
+    const c=`rgb(${R},${G},${B})`;
+    const px=28+d*9;
+    dot.style.width=dot.style.height=px+'px';
+    dot.style.background=`radial-gradient(circle at 35% 35%, #fff 0, ${c} 45%, ${c} 100%)`;
+    dot.style.boxShadow=`0 0 ${px}px ${px/2}px ${c}, 0 0 ${px*3}px ${px}px ${c}55`;
+    document.getElementById('sizeLbl').textContent=document.getElementById('rSize').textContent=d.toFixed(1)+' nm';
+    document.getElementById('rGap').textContent=gap.toFixed(2)+' eV';
+    document.getElementById('rWl').textContent=Math.round(wl)+' nm';
+    fill.style.width=((gap-1.7)/1.4*100)+'%';fill.style.background=c;
+  }
+  r.addEventListener('input',upd);upd();
+})();
+
+/* ===== ① 밴드 ===== */
+(function(){
+  const svg=document.getElementById('bandSvg'),r=document.getElementById('atomR');
+  const levels=[{y:230,name:'안쪽 궤도 (낮은 에너지)'},{y:150,name:'바깥 궤도 (높은 에너지)'},{y:80,name:'더 바깥 궤도'}];
+  function draw(){
+    const n=+r.value;
+    document.getElementById('atomLbl').textContent=n+'개';
+    let s=`<g font-family="Noto Sans KR" font-size="11" fill="#9ba6bf">`;
+    s+=`<line x1="40" y1="20" x2="40" y2="270" stroke="#26314b"/><text x="46" y="24">에너지 ↑</text>`;
+    levels.forEach((L,i)=>{
+      const spread=n===1?0:Math.min(26,4+Math.log(n)*6.5);
+      const col=['#4d8dff','#3ef08a','#ff5a4e'][i];
+      if(n>=12){s+=`<rect x="70" y="${L.y-spread}" width="290" height="${spread*2}" fill="${col}" opacity=".18" rx="3"/>`}
+      for(let k=0;k<n;k++){
+        const off=n===1?0:(k/(n-1)-0.5)*2*spread;
+        s+=`<line x1="70" y1="${L.y+off}" x2="360" y2="${L.y+off}" stroke="${col}" stroke-width="${n>20?0.8:1.6}" opacity="${n>20?.6:.9}"/>`;
+      }
+      s+=`<text x="365" y="${L.y+4}" font-size="10">${n>=12?'밴드':'준위'}</text>`;
+      s+=`<text x="70" y="${L.y-spread-6}" font-size="10">${L.name}</text>`;
+    });
+    s+=`<text x="215" y="290" text-anchor="middle" fill="#e9edf6">${n===1?'원자 1개: 준위가 하나의 값':n<12?'궤도가 중첩되며 준위가 조금씩 어긋난다':'수많은 준위가 모여 "범위" = 에너지 밴드'}</text></g>`;
+    svg.innerHTML=s;
+  }
+  r.addEventListener('input',draw);draw();
+})();
+
+/* ===== ② 흡수·방출 ===== */
+(function(){
+  const svg=document.getElementById('emitSvg'),btn=document.getElementById('supplyBtn'),st=document.getElementById('emitState');
+  const cx=150,cy=170,r1=45,r2=95,r3=135;
+  let busy=false;
+  function base(eAngle,eR,photon){
+    return `<g font-family="Noto Sans KR" font-size="11" fill="#9ba6bf">
+      <circle cx="${cx}" cy="${cy}" r="${r3}" fill="none" stroke="#26314b" stroke-dasharray="4 4"/>
+      <circle cx="${cx}" cy="${cy}" r="${r2}" fill="none" stroke="#35476d"/>
+      <circle cx="${cx}" cy="${cy}" r="${r1}" fill="none" stroke="#35476d"/>
+      <circle cx="${cx}" cy="${cy}" r="12" fill="#f2b544"/><text x="${cx}" y="${cy+4}" text-anchor="middle" fill="#1a1200" font-weight="700">핵</text>
+      <text x="${cx+r1+4}" y="${cy-r1+12}">안쪽 궤도</text><text x="${cx+r2-30}" y="${cy-r2-6}">바깥쪽 궤도</text>
+      <circle cx="${cx+eR*Math.cos(eAngle)}" cy="${cy+eR*Math.sin(eAngle)}" r="8" fill="#4d8dff" stroke="#fff" stroke-width="1.5"/>
+      ${photon}
+      <g transform="translate(300,60)">
+        <text x="0" y="0" fill="#e9edf6">에너지</text>
+        <line x1="0" y1="30" x2="100" y2="30" stroke="#ff5a4e" stroke-width="2"/><text x="0" y="24" font-size="10">바깥 궤도</text>
+        <line x1="0" y1="150" x2="100" y2="150" stroke="#4d8dff" stroke-width="2"/><text x="0" y="170" font-size="10">안쪽 궤도</text>
+        <path d="M50 150 V30" stroke="#f2b544" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <text x="58" y="95" font-size="10" fill="#f2b544">변동 폭</text>
+        <text x="58" y="110" font-size="10" fill="#f2b544">= 빛 에너지</text>
+        <circle cx="50" cy="${eR===r1?150:30}" r="6" fill="#4d8dff"/>
+      </g></g>`;
+  }
+  svg.innerHTML=base(-Math.PI/2,r1,'');
+  btn.addEventListener('click',()=>{
+    if(busy)return;busy=true;btn.disabled=true;
+    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let t=0;const T=reduce?1:40;
+    st.textContent='에너지 흡수 중';
+    const up=setInterval(()=>{t++;const k=t/T;const R=r1+(r2-r1)*k;
+      const arrow=`<path d="M${cx-190} ${cy} H${cx-R-10}" stroke="#f2b544" stroke-width="3" marker-end="url(#ar2)"/><text x="${cx-190}" y="${cy-8}" font-size="11" fill="#f2b544">에너지 공급</text>`;
+      svg.innerHTML=`<defs><marker id="ar2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#f2b544"/></marker></defs>`+base(-Math.PI/2+k*1.2,R,arrow);
+      if(t>=T){clearInterval(up);st.textContent='바깥 궤도 (불안정)';setTimeout(down,reduce?200:700)}},16);
+    function down(){
+      let t=0;st.textContent='빛을 내며 복귀';
+      const dn=setInterval(()=>{t++;const k=t/T;const R=r2-(r2-r1)*k;
+        const px=cx+R*Math.cos(-Math.PI/2+1.2),py=cy+R*Math.sin(-Math.PI/2+1.2);
+        const wave=`<path d="M${px+10} ${py} q8 -10 16 0 t16 0 t16 0 t16 0 t16 0" stroke="#3ef08a" stroke-width="2.5" fill="none" transform="translate(${k*40},${-k*30})" opacity="${1-k*.2}"/><text x="${px+30+k*40}" y="${py-14-k*30}" font-size="11" fill="#3ef08a">빛 방출</text>`;
+        svg.innerHTML=base(-Math.PI/2+1.2+k*.8,R,wave);
+        if(t>=T){clearInterval(dn);st.textContent='준비';busy=false;btn.disabled=false}},16);
+    }
+  });
+})();
+
+/* ===== ④ 스펙트럼 ===== */
+(function(){
+  const cv=document.getElementById('specCv'),ctx=cv.getContext('2d');
+  let mode='bulk';
+  const peaks=[{wl:460,c:'#4d8dff'},{wl:530,c:'#3ef08a'},{wl:630,c:'#ff5a4e'}];
+  const X=wl=>60+(wl-400)/(720-400)*(cv.width-90);
+  function gauss(x,m,s){return Math.exp(-((x-m)**2)/(2*s*s))}
+  function draw(){
+    const W=cv.width,H=cv.height;ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#26314b';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(60,H-40);ctx.lineTo(W-30,H-40);ctx.moveTo(60,20);ctx.lineTo(60,H-40);ctx.stroke();
+    ctx.fillStyle='#9ba6bf';ctx.font='13px "Noto Sans KR"';ctx.textAlign='center';
+    for(let wl=400;wl<=700;wl+=50){ctx.fillText(wl,X(wl),H-20)}
+    ctx.textAlign='left';ctx.fillText('파장(nm)',W-100,H-4);ctx.save();ctx.translate(20,H/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText('빛의 세기',0,0);ctx.restore();
+    const plot=(s,alpha,label)=>{
+      peaks.forEach(p=>{
+        ctx.beginPath();ctx.moveTo(X(400),H-40);
+        for(let wl=400;wl<=720;wl+=1){const y=H-40-gauss(wl,p.wl,s)*(H-90);ctx.lineTo(X(wl),y)}
+        ctx.lineTo(X(720),H-40);ctx.closePath();
+        ctx.fillStyle=p.c;ctx.globalAlpha=alpha;ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle=p.c;ctx.lineWidth=2;ctx.stroke();
+      });
+      ctx.fillStyle='#e9edf6';ctx.font='500 14px "Noto Sans KR"';ctx.textAlign='left';ctx.fillText(label,70,36);
+    };
+    if(mode==='bulk')plot(40,.35,'에너지 밴드 물질: 봉우리가 넓어 옆 색과 겹친다 (반치폭 ≈ 80~100 nm)');
+    else if(mode==='qd')plot(12,.5,'양자점: 봉우리가 좁아 원색이 순수하다 (반치폭 ≈ 20~30 nm)');
+    else{plot(40,.15,'');plot(12,.55,'겹쳐 보기: 넓은 봉우리(연함) vs 양자점(진함)')}
+  }
+  ['mBulk','mQd','mBoth'].forEach(id=>document.getElementById(id).addEventListener('click',e=>{
+    mode=e.target.dataset.mode;document.querySelectorAll('#spec .ctrl button').forEach(b=>b.classList.toggle('on',b===e.target));draw();
+  }));
+  draw();
+})();
+
+/* ===== ⑤ 구조 ===== */
+(function(){
+  const svg=document.getElementById('qdSvg');
+  const info={
+    core:{tag:'코어 (core)',name:'발광의 중심',desc:'반도체 나노 결정. 에너지를 받은 전자가 여기서 오르내리며 빛을 낸다. 크기가 색을 정한다. 공기·수분에 닿으면 산화되고, 빛에 계속 노출되면 광 퇴색이 일어난다.'},
+    shell:{tag:'셸 (shell)',name:'단단한 무기물 껍질',desc:'온도·습도로 인한 손상을 막아 발광 효율을 유지하고 수명을 연장한다. 코어 원소(카드뮴)의 독성이 밖으로 나오지 않게 가둔다.'},
+    lig:{tag:'리간드 (ligand)',name:'표면에 붙는 유기 화합물',desc:'셸에 붙어 안정화와 성능 향상에 영향을 미친다. 양자점끼리 뭉치지 않게 하고, 불순물이 달라붙는 것을 막는다. 지문이 마지막에 "최적화"의 대상으로 지목한 층.'},
+    threat:{tag:'외부 위협',name:'산소 · 수분 · 빛 · 열',desc:'표면적/부피 비가 큰 작은 입자일수록 이 위협에 노출되는 비율이 높다. 그래서 ㉠ "양자점은 특히 표면층의 중요성이 크다."'}
+  };
+  const cx=210,cy=165;
+  let s=`<g font-family="Noto Sans KR" font-size="12" fill="#9ba6bf">`;
+  for(let i=0;i<14;i++){const a=i/14*Math.PI*2;const x1=cx+112*Math.cos(a),y1=cy+112*Math.sin(a),x2=cx+150*Math.cos(a),y2=cy+150*Math.sin(a);
+    s+=`<path class="L" data-k="lig" d="M${x1} ${y1} L${x2} ${y2}" stroke="#f2b544" stroke-width="4" stroke-linecap="round" style="cursor:pointer"/><circle class="L" data-k="lig" cx="${x2}" cy="${y2}" r="6" fill="#f2b544" style="cursor:pointer"/>`}
+  s+=`<circle class="L" data-k="shell" cx="${cx}" cy="${cy}" r="110" fill="#2b3552" stroke="#9ba6bf" stroke-width="2" style="cursor:pointer"/>
+      <circle class="L" data-k="core" cx="${cx}" cy="${cy}" r="62" fill="url(#gCore)" style="cursor:pointer"/>
+      <defs><radialGradient id="gCore"><stop offset="0" stop-color="#c9ffde"/><stop offset=".6" stop-color="#3ef08a"/><stop offset="1" stop-color="#1aa85c"/></radialGradient></defs>
+      <text x="${cx}" y="${cy+5}" text-anchor="middle" fill="#0c1120" font-weight="700" font-size="14" pointer-events="none">코어</text>
+      <text x="${cx}" y="${cy-80}" text-anchor="middle" fill="#e9edf6" pointer-events="none">셸</text>
+      <text x="${cx+150}" y="${cy-150}" text-anchor="end" fill="#f2b544" pointer-events="none">리간드</text>`;
+  [['O₂ 산소',30,40],['H₂O 수분',390,40],['빛(광 퇴색)',30,320],['열·습도',390,320]].forEach(([t,x,y])=>{
+    s+=`<text class="L" data-k="threat" x="${x}" y="${y}" text-anchor="middle" fill="#ff5a4e" style="cursor:pointer">${t}</text>`});
+  s+=`</g>`;svg.innerHTML=s;
+  svg.querySelectorAll('.L').forEach(el=>{
+    const show=()=>{const k=info[el.dataset.k];document.getElementById('layerTag').textContent=k.tag;document.getElementById('layerName').textContent=k.name;document.getElementById('layerDesc').textContent=k.desc};
+    el.addEventListener('mouseenter',show);el.addEventListener('click',show);
+  });
+})();
+
+/* ===== ⑥ 정육면체 ===== */
+(function(){
+  const svg=document.getElementById('cubeSvg'),r=document.getElementById('edgeR');
+  function draw(){
+    const a=+r.value;const V=a**3,S=6*a*a;
+    document.getElementById('edgeLbl').textContent=a+' m';
+    document.getElementById('rV').textContent=fmt(V);document.getElementById('rS').textContent=fmt(S);document.getElementById('rSV').textContent=(S/V).toFixed(1);
+    const L=16*a,ox=110,oy=210,dx=L*.45,dy=L*.3;
+    const c=`<g fill="#e9edf6" font-family="Noto Sans KR" font-size="12">
+      <polygon points="${ox},${oy} ${ox+L},${oy} ${ox+L},${oy-L} ${ox},${oy-L}" fill="#4d8dff" opacity=".7"/>
+      <polygon points="${ox},${oy-L} ${ox+L},${oy-L} ${ox+L+dx},${oy-L-dy} ${ox+dx},${oy-L-dy}" fill="#7faaff" opacity=".7"/>
+      <polygon points="${ox+L},${oy} ${ox+L+dx},${oy-dy} ${ox+L+dx},${oy-L-dy} ${ox+L},${oy-L}" fill="#2f5fb8" opacity=".85"/>
+      <text x="${ox+L/2}" y="${oy+18}" text-anchor="middle" fill="#9ba6bf">한 변 ${a} m</text>
+      <g transform="translate(300,40)">
+        <text x="0" y="0" fill="#9ba6bf">10 m 기준 대비</text>
+        <text x="0" y="26">부피: <tspan fill="#4d8dff">1/${fmt(1000/V%1===0?1000/V:+(1000/V).toFixed(1))}</tspan></text>
+        <text x="0" y="52">표면적: <tspan fill="#3ef08a">1/${fmt(600/S%1===0?600/S:+(600/S).toFixed(1))}</tspan></text>
+        <text x="0" y="86" fill="#f2b544" font-size="11">작아질수록 표면적 ÷ 부피가 커진다</text>
+      </g></g>`;
+    svg.innerHTML=c;
+  }
+  r.addEventListener('input',draw);draw();
+})();
+</script>
+</body>
+</html>
