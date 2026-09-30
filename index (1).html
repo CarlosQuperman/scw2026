@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2027 수시 지원 상담카드 (자동채움)</title>
+<style>
+:root { --bg:#f6f7f9; --panel:#ffffff; --ink:#1f2933; --muted:#667085; --line:#d7dde5; --line-strong:#aab4c2; --navy:#17456b; --soft-blue:#e8f1f8; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:"Segoe UI","Malgun Gothic",Arial,sans-serif; font-size:14px; }
+header { background:linear-gradient(115deg,#173f5f 0%,#1f6f78 100%); color:#fff; padding:18px 24px; }
+header h1 { margin:0; font-size:21px; }
+header p { margin:6px 0 0; color:rgba(255,255,255,.85); font-size:13px; }
+main { max-width:1480px; margin:0 auto; padding:16px 18px 40px; }
+.panel-head { margin:0 0 10px; }
+.panel-head h2 { margin:0 0 4px; font-size:17px; color:var(--navy); }
+.panel-head span { color:var(--muted); font-size:13px; line-height:1.5; }
+input, select { font-family:inherit; }
+
+    /* ==================== 상담카드 탭 ==================== */
+    .card-toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px; }
+    .card-toolbar button { border:1px solid var(--line-strong); background:#fff; border-radius:7px; padding:8px 14px; cursor:pointer; font-size:13px; font-weight:600; color:var(--ink); }
+    .card-toolbar button.primary { background:var(--navy); border-color:var(--navy); color:#fff; }
+    .card-toolbar button:hover { filter:brightness(.96); }
+    .card-toolbar .card-hint { color:var(--muted); font-size:12px; }
+    .card-sheet { background:#fff; border:1px solid var(--line); border-radius:8px; padding:18px 16px; overflow-x:auto; }
+    .card-inner { min-width:1330px; }
+    .card-title { text-align:center; font-size:22px; font-weight:800; letter-spacing:2px; margin:0 0 8px; color:#000; }
+    .card-idrow { display:flex; justify-content:flex-end; gap:4px; align-items:center; font-size:13px; font-weight:700; margin:0 0 8px; color:#000; }
+    .card-idrow input { width:76px; height:20px; min-height:0; border:none; border-radius:0; border-bottom:1px solid #888; text-align:center; font-size:13px; padding:2px 2px; background:transparent; }
+    .card-sec-label { font-size:13.5px; font-weight:800; margin:8px 0 5px; color:#000; }
+    table.card-info { width:100%; border-collapse:collapse; table-layout:fixed; margin-bottom:12px; }
+    table.card-info th, table.card-info td { border:1px solid #444; font-size:12.5px; padding:4px 6px; color:#000; }
+    table.card-info th { background:#f1f3f5; font-weight:700; text-align:center; white-space:nowrap; }
+    table.card-info input { width:100%; height:20px; min-height:0; border:none; border-radius:0; font-size:12.5px; padding:1px 2px; background:transparent; color:#000; }
+    .card-ox { display:inline-block; min-width:36px; text-align:center; cursor:pointer; border-bottom:1px dashed #b0b8c1; font-weight:800; font-size:13px; line-height:1.2; user-select:none; color:#17456b; }
+    .card-ox:hover { background:#eef4fa; }
+    table.card-main { width:100%; border-collapse:collapse; table-layout:fixed; }
+    table.card-main th, table.card-main td { border:1px solid #444; font-size:11.5px; padding:2px 3px; text-align:center; vertical-align:middle; color:#000; word-break:break-all; }
+    table.card-main thead th { background:#f1f3f5; font-weight:700; font-size:11.5px; line-height:1.25; padding:4px 2px; }
+    table.card-main input { width:100%; height:18px; min-height:0; border:none; border-radius:0; font-size:11.5px; text-align:center; padding:1px; background:transparent; color:#000; }
+    table.card-main .card-ce { min-height:15px; outline:none; font-size:11px; line-height:1.3; text-align:center; white-space:pre-wrap; }
+    table.card-main .card-typecell { padding:0; }
+    table.card-main select.card-kind { width:100%; height:18px; min-height:0; border:none; border-radius:0; background:transparent; font-size:11px; text-align:center; text-align-last:center; appearance:none; -webkit-appearance:none; padding:1px; color:#000; cursor:pointer; }
+    table.card-main .card-typecell .card-ce { padding:2px 3px; }
+    table.card-main .card-typecell .tk { border-bottom:1px solid #888; font-weight:600; }
+    .card-rowgroup { break-inside:avoid; page-break-inside:avoid; }
+    .card-stage-label { background:#fafbfc; font-size:10.5px; white-space:nowrap; }
+    .card-strat { cursor:pointer; user-select:none; font-size:10.5px; white-space:nowrap; color:#777; }
+    .card-strat.picked { color:#000; font-weight:800; }
+    .card-strat.picked::before { content:'● '; }
+    .card-clear-row { border:none; background:transparent; color:#b44b5f; cursor:pointer; font-size:11px; padding:0; display:block; margin:2px auto 0; }
+    .card-notes { font-size:11.5px; color:#000; margin:8px 0 0; line-height:1.5; }
+    .card-notes p { margin:0; }
+    .card-ac-box { position:absolute; z-index:9999; background:#fff; border:1px solid var(--line-strong); border-radius:6px; box-shadow:0 8px 20px rgba(31,41,51,.18); max-height:340px; overflow-y:auto; min-width:200px; display:none; overscroll-behavior:contain; }
+    .card-ac-box::-webkit-scrollbar { width:14px; }
+    .card-ac-box::-webkit-scrollbar-track { background:#f2f5f8; border-radius:0 6px 6px 0; }
+    .card-ac-box::-webkit-scrollbar-thumb { background:#a9b8c6; border-radius:7px; border:3px solid #f2f5f8; min-height:40px; }
+    .card-ac-box::-webkit-scrollbar-thumb:hover { background:#7f93a6; }
+    .card-ac-item { padding:7px 10px; font-size:12.5px; cursor:pointer; text-align:left; display:flex; justify-content:space-between; gap:10px; }
+    .card-ac-item .ac-meta { color:var(--muted); font-size:11px; flex:0 0 auto; }
+    .card-ac-item:hover, .card-ac-item.hover, .card-ac-item.active { background:var(--soft-blue); }
+    .card-ac-count { position:sticky; top:0; background:#f7fafc; color:var(--muted); font-size:10.5px; padding:3px 10px; border-bottom:1px solid var(--line-strong); text-align:right; letter-spacing:.02em; }
+    .card-filled { background:#f4f9f4; }
+    .card-examcell .card-ce { text-align:left; }
+    .card-date-dup { color:#c0141e; font-weight:800; text-decoration:underline; }
+    /* ---- 3단계: 불러오기 상태 · 성적 분석 · 제출 ---- */
+    #loadBar { display:none; position:sticky; top:0; z-index:50; background:#fff8e1; color:#5f4b00; border-bottom:1px solid #f1d27a; padding:8px 24px; font-size:13px; font-weight:600; }
+    #loadBar.on { display:block; }
+    #loadBar.err { background:#fdecea; color:#8a1c12; border-color:#f2b8b0; }
+    .card-strat.suggest { outline:2px dashed #1f6f78; outline-offset:-3px; }
+    .an-wrap { margin:12px 0 4px; }
+    .an-note { font-size:11.5px; color:#444; margin:0 0 5px; line-height:1.5; }
+    table.an-table { width:100%; border-collapse:collapse; table-layout:fixed; }
+    table.an-table th, table.an-table td { border:1px solid #444; font-size:11.5px; padding:3px 5px; text-align:center; color:#000; word-break:keep-all; }
+    table.an-table th { background:#f1f3f5; }
+    table.an-table td.l { text-align:left; }
+    .v-안정 { color:#1b6b3a; font-weight:800; } .v-적정 { color:#17456b; font-weight:800; }
+    .v-상향 { color:#a15c00; font-weight:800; } .v-소신 { color:#b3261e; font-weight:800; }
+    .ok { color:#1b6b3a; font-weight:700; } .no { color:#b3261e; font-weight:700; } .na { color:#777; }
+    #cardSubmitMsg.okmsg { color:#1b6b3a; font-weight:700; } #cardSubmitMsg.errmsg { color:#b3261e; font-weight:700; }
+    @media print {
+      body.print-card header, body.print-card .metrics, body.print-card .tabbar, body.print-card #scorePanel,
+      body.print-card #directoryPanel, body.print-card #jsRegionPanel, body.print-card #deptPanel,
+      body.print-card #comparePanel, body.print-card #qualPanel, body.print-card #fitPanel,
+      body.print-card #universitySummaryPanel, body.print-card #workspace, body.print-card .no-print { display:none !important; }
+      body.print-card main { max-width:none; padding:0; margin:0; }
+      body.print-card #cardPanel { display:block !important; box-shadow:none; border:none; padding:0; margin:0; background:#fff; }
+      body.print-card .card-sheet { border:none; border-radius:0; padding:0; overflow:visible; }
+      body.print-card .card-inner { min-width:0; }
+      body.print-card .card-title { font-size:19px; }
+      body.print-card table.card-info th, body.print-card table.card-info td { border:1px solid #000; font-size:10.5px; padding:3px 4px; }
+      body.print-card table.card-info th { background:#eceff1 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      body.print-card table.card-main th, body.print-card table.card-main td { border:1px solid #000; font-size:9px; padding:1.5px 2px; }
+      body.print-card table.card-main thead th { background:#eceff1 !important; font-size:9px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      body.print-card table.card-main input { height:13px; font-size:9px; }
+      body.print-card table.card-main select.card-kind { height:13px; font-size:9px; }
+      body.print-card table.card-info input { height:15px; font-size:10.5px; }
+      body.print-card .card-ox { border-bottom:none; color:#000; font-size:11px; }
+      body.print-card table.card-main .card-ce { font-size:8.5px; min-height:11px; }
+      body.print-card table.card-main .card-stage-label, body.print-card table.card-main .card-strat { font-size:8.5px; }
+      body.print-card .card-filled { background:#fff; }
+      body.print-card .card-strat { color:#333; }
+      body.print-card .card-date-dup { color:#c0141e !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      body.print-card table.card-main thead { display:table-header-group; }
+    }
+    /* ---- 담임교사 상담 기록 ---- */
+    table.card-teacher { margin-bottom:4px; }
+    table.card-teacher th { white-space:normal; }
+    table.card-teacher td { vertical-align:middle; }
+    table.card-teacher .card-tce { min-height:46px; outline:none; font-size:12.5px; line-height:1.5; text-align:left; white-space:pre-wrap; padding:3px 5px; color:#000; }
+    table.card-teacher input { text-align:center; }
+    table.card-teacher tr { break-inside:avoid; page-break-inside:avoid; }
+    .card-teacher-wrap { break-inside:avoid; page-break-inside:avoid; margin-top:14px; }
+    body.print-card table.card-teacher .card-tce { min-height:52px; font-size:10px; }
+    /* ==================== /상담카드 탭 ==================== */
+
+@media print { header { display:none !important; } body { background:#fff; } main { max-width:none; padding:0; } }
+</style>
+</head>
+<body>
+<header class="no-print">
+  <h1>2027학년도 대입전형 수시 지원 상담카드 (자동채움)</h1>
+  <p>대학명 → 전형명 → 학과명을 입력하면 나머지 칸이 자동으로 채워집니다. 자료에 없는 대학(과학기술원 등)은 직접 입력하면 됩니다. 작성 내용은 이 컴퓨터 브라우저에 자동 저장되고, ‘교사에게 제출’을 누르면 담임 선생님 시트에 기록됩니다. <span style="opacity:.85;">· 제작: 운정고등학교 이재규</span></p>
+</header>
+<div id="loadBar" class="no-print" role="status" aria-live="polite"></div>
+<main>
+  <section id="cardPanel"></section>
+</main>
+<script>
+(function () {
+  'use strict';
+  /* ===== 3단계: 자료는 HTML에 넣지 않고 교사 드라이브의 JSON에서 필요한 만큼만 불러온다 =====
+     · 시작할 때: 대학 목록 + 고사일(sched.json)
+     · 대학을 고를 때: 그 대학 파일 하나(예: 경북대.json)만                                    */
+  let BOOT = { unis: [] };
+  function call(fn) {
+    const args = Array.prototype.slice.call(arguments, 1);
+    return new Promise((resolve, reject) => {
+      if (!(window.google && google.script && google.script.run)) {
+        reject(new Error('앱스크립트 웹 앱 주소(…/exec)로 열어야 자료를 불러오고 제출할 수 있다.'));
+        return;
+      }
+      const r = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+      r[fn].apply(r, args);
+    });
+  }
+  function setStatus(msg, isErr) {
+    const b = document.getElementById('loadBar');
+    if (!b) return;
+    b.textContent = msg || '';
+    b.className = msg ? ('on' + (isErr ? ' err' : '')) : '';
+  }
+  const favorites = [];
+  const el = id => document.getElementById(id);
+  const text = value => value === null || value === undefined ? '' : String(value);
+  const norm = value => text(value).toLowerCase();
+  const loose = value => norm(value).replace(/[\s\-_/()\[\].,·・]/g, '');
+  const escapeHtml = value => text(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const escapeAttr = value => escapeHtml(value).replace(/"/g, '&quot;');
+
+    let CARD_SCHED = [];   // 3단계: 드라이브의 sched.json에서 불러옴
+
+    // ==================== 상담카드 탭 ====================
+    const CARD_KEY = 'ddyjd_card_student_v1';
+    const CARD_ROWS = 12;
+    const CARD_TCH_ROWS = 3;
+    const CARD_ELEMS = ['학생부', '서류', '면접', '적성', '논술', '실기'];
+    let cardState = null;
+    let cardBuilt = false;
+    let cardByUni = null;
+    let cardUniNames = null;
+    let cardSaveTimer = null;
+
+    function cardBlankStages() { return [{ ratio: '', pct: { 학생부: '', 서류: '', 면접: '', 적성: '', 논술: '', 실기: '' } }, { ratio: '', pct: { 학생부: '', 서류: '', 면접: '', 적성: '', 논술: '', 실기: '' } }, { ratio: '', pct: { 학생부: '', 서류: '', 면접: '', 적성: '', 논술: '', 실기: '' } }]; }
+    function cardBlankRow() { return { uni: '', major: '', typeName: '', typeKind: '', quota: '', comp: '', avg: '', conv: '', exam: '', minreq: '', minreqFull: '', stages: cardBlankStages(), strategy: '', filledKey: '', c50: '', c70: '', cavg: '' }; }
+    function cardDefaultState() {
+      const header = {};
+      ['hakbun', 'name', 'naeshin', 'm_kor', 'm_math', 'm_eng', 'm_t1', 'm_t2', 'm_hist', 'jinro', 'hgwa', 'banghakjung', 'bangakhu', 'jeonmun', 'univ4', 'susi', 'jeongsi', 'gyogwa', 'jonghap', 'jukseong', 'nonsul', 'silgi', 'gita'].forEach(k => header[k] = '');
+      const teacher = { rows: Array.from({ length: CARD_TCH_ROWS }, () => ({ d: '', c: '', s: '' })), final: '' };
+      return { header, rows: Array.from({ length: CARD_ROWS }, cardBlankRow), teacher };
+    }
+    function cardLoad() {
+      if (cardState) return;
+      cardState = cardDefaultState();
+      try {
+        const saved = JSON.parse(localStorage.getItem(CARD_KEY));
+        if (saved && saved.rows) {
+          Object.assign(cardState.header, saved.header || {});
+          for (let i = 0; i < CARD_ROWS; i++) {
+            if (saved.rows[i]) {
+              const b = cardBlankRow();
+              Object.keys(b).forEach(k => { if (k !== 'stages' && saved.rows[i][k] != null) b[k] = saved.rows[i][k]; });
+              if (Array.isArray(saved.rows[i].stages)) for (let s = 0; s < 3; s++) if (saved.rows[i].stages[s]) {
+                b.stages[s].ratio = text(saved.rows[i].stages[s].ratio);
+                Object.assign(b.stages[s].pct, saved.rows[i].stages[s].pct || {});
+              }
+              cardState.rows[i] = b;
+            }
+          }
+          if (saved.teacher) {
+            const tb = cardState.teacher;
+            if (Array.isArray(saved.teacher.rows)) for (let i = 0; i < CARD_TCH_ROWS; i++) if (saved.teacher.rows[i]) {
+              ['d', 'c', 's'].forEach(k => { if (saved.teacher.rows[i][k] != null) tb.rows[i][k] = text(saved.teacher.rows[i][k]); });
+            }
+            if (saved.teacher.final != null) tb.final = text(saved.teacher.final);
+          }
+        }
+      } catch (e) {}
+    }
+    function cardSaveNow() { if (!cardState) return; try { localStorage.setItem(CARD_KEY, JSON.stringify(cardState)); } catch (e) {} }
+    function cardSave() {
+      clearTimeout(cardSaveTimer);
+      cardSaveTimer = setTimeout(() => { cardSaveNow(); renderAnalysis(); }, 250);
+    }
+    window.addEventListener('beforeunload', cardSaveNow);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') cardSaveNow(); });
+    function buildCardIndex() {
+      if (cardByUni) return;
+      cardByUni = new Map();                       // 불러온 대학만 채워진다
+      cardUniNames = (BOOT.unis || []).slice().sort((a, b) => a.localeCompare(b, 'ko'));
+    }
+    const uniPending = new Map();
+    function uniResolve(name) {
+      buildCardIndex();
+      const t = text(name).trim();
+      if (!t) return '';
+      if (cardUniNames.indexOf(t) !== -1) return t;
+      const l = loose(t);
+      return cardUniNames.find(u => loose(u) === l) || '';
+    }
+    function ensureUni(uni, cb) {
+      buildCardIndex();
+      if (!uni) return;
+      if (cardByUni.has(uni)) { if (cb) cb(); return; }
+      if (uniPending.has(uni)) { if (cb) uniPending.get(uni).push(cb); return; }
+      uniPending.set(uni, cb ? [cb] : []);
+      setStatus(uni + ' 자료를 불러오는 중…');
+      call('getUni', uni).then(txt => {
+        const o = typeof txt === 'string' ? JSON.parse(txt) : txt;
+        const list = o.rows.map(a => { const r = {}; o.cols.forEach((c, i) => { if (a[i] !== null && a[i] !== undefined) r[c] = a[i]; }); return r; });
+        cardByUni.set(uni, list);
+        setStatus('');
+        const cbs = uniPending.get(uni) || [];
+        uniPending.delete(uni);
+        cbs.forEach(f => f());
+      }).catch(err => {
+        uniPending.delete(uni);
+        setStatus(uni + ' 자료를 불러오지 못했다: ' + (err && err.message ? err.message : err), true);
+      });
+    }
+    function cardIsSubseq(q, s) { let i = 0; for (const ch of s) { if (ch === q[i]) i++; if (i === q.length) return true; } return q.length === 0; }
+    function cardAcRank(q, list) {
+      const lq = loose(q);
+      if (!lq) return list.slice(); // 검색어가 없으면 전체 목록 표시 (스크롤로 탐색)
+      const starts = [], sub = [], seq = [];
+      for (const item of list) {
+        const ls = loose(typeof item === 'string' ? item : item.v);
+        if (ls.startsWith(lq)) starts.push(item);
+        else if (ls.includes(lq)) sub.push(item);
+        else if (lq.length >= 2 && cardIsSubseq(lq, ls)) seq.push(item);
+      }
+      return starts.concat(sub, seq).slice(0, 60);
+    }
+    function cardRowsFor(uni, typeName, major) {
+      buildCardIndex();
+      let list = cardByUni.get(text(uni).trim()) || [];
+      if (typeName) list = list.filter(r => text(r['전형명']).trim() === typeName);
+      if (major) list = list.filter(r => text(r['학과명']).trim() === major);
+      return list;
+    }
+    function cardTypeCands(uni, major) {
+      let list = cardRowsFor(uni, '', major && cardRowsFor(uni, '', major).length ? major : '');
+      const seen = new Map();
+      list.forEach(r => { const t = text(r['전형명']).trim(); if (t && !seen.has(t)) seen.set(t, cardNormKind(r['전형유형'])); });
+      return Array.from(seen.entries()).map(([v, m]) => ({ v, m }));
+    }
+    function cardMajorCands(uni, typeName) {
+      let list = cardRowsFor(uni, typeName && cardRowsFor(uni, typeName).length ? typeName : '', '');
+      const seen = new Map();
+      list.forEach(r => { const t = text(r['학과명']).trim(); if (t && !seen.has(t)) seen.set(t, cardNormKind(r['전형유형'])); });
+      return Array.from(seen.entries()).map(([v, m]) => ({ v, m }));
+    }
+    function cardNormKind(v) {
+      const s = text(v).trim();
+      if (!s) return '';
+      if (s.indexOf('종합') !== -1) return '학생부종합';
+      if (s.indexOf('교과') !== -1) return '학생부교과';
+      if (s.indexOf('논술') !== -1) return '논술';
+      if (s.indexOf('실기') !== -1 || s.indexOf('실적') !== -1) return '실기/실적';
+      return s;
+    }
+    function cardParseMinreq(v) {
+      const t = text(v).trim();
+      if (!t) return { short: '', full: '' };
+      if (t.length < 14 && /미반영|없음|해당\s*없음|^무$|^-+$|^X$|^x$/.test(t)) return { short: '없음', full: t };
+      const m = t.match(/(\d)\s*개\s*(?:영역)?[^0-9]{0,24}?합\s*(\d{1,2})/);
+      let short = m ? m[1] + '개합' + m[2] : '있음';
+      if (!m) {
+        const m2 = t.match(/(\d)\s*개\s*(?:영역|과목)?\s*1\s*등급/) || t.match(/1\s*등급\s*(\d)\s*개/);
+        if (m2) short = '1등급' + m2[1] + '개';
+      }
+      // 영어·한국사 별도 기준도 함께 표시 (예: 2개합4 + 영3·한4)
+      const extras = [];
+      const em = t.match(/영어\s*(?:등급)?\s*(\d)\s*(?:등급)?\s*(?:이내|이하)/);
+      if (em) extras.push('영' + em[1]);
+      const hm = t.match(/한국사\s*(?:등급)?\s*(\d)\s*(?:등급)?\s*(?:이내|이하)/);
+      if (hm) extras.push('한' + hm[1]);
+      if (extras.length) short += '\n' + extras.join('·');
+      return { short, full: t };
+    }
+    const CARD_DATE_RE = /(?:(\d{4})\s*[.\-\/]\s*)?(\d{1,2})\s*[.\-\/]\s*(\d{1,2})(?![\d월])/g;
+    const CARD_DATEISH_RE = /\d{1,2}\s*[.\-\/]\s*\d{1,2}|\d{1,2}\s*월/;
+    function cardExamDates(t) {
+      const out = []; let m;
+      CARD_DATE_RE.lastIndex = 0;
+      const s = text(t);
+      while ((m = CARD_DATE_RE.exec(s)) !== null) out.push((m[1] || '2026') + '-' + (+m[2]) + '-' + (+m[3]));
+      return out;
+    }
+    function cardConflictDates() {
+      const cnt = {};
+      cardState.rows.forEach(r => { Array.from(new Set(cardExamDates(r.exam))).forEach(d => { cnt[d] = (cnt[d] || 0) + 1; }); });
+      const dup = new Set();
+      Object.keys(cnt).forEach(d => { if (cnt[d] > 1) dup.add(d); });
+      return dup;
+    }
+    function cardRenderExam(idx, dups) {
+      const c = cardCell(idx, 'exam');
+      if (!c) return;
+      const t = cardState.rows[idx].exam || '';
+      let html = '', last = 0, m;
+      CARD_DATE_RE.lastIndex = 0;
+      while ((m = CARD_DATE_RE.exec(t)) !== null) {
+        const key = (m[1] || '2026') + '-' + (+m[2]) + '-' + (+m[3]);
+        html += escapeHtml(t.slice(last, m.index));
+        const seg = escapeHtml(m[0]);
+        html += dups.has(key) ? '<span class="card-date-dup" title="다른 지원 건과 고사일이 겹칩니다!">' + seg + '</span>' : seg;
+        last = m.index + m[0].length;
+      }
+      html += escapeHtml(t.slice(last));
+      c.innerHTML = html.replace(/\n/g, '<br>');
+    }
+    function cardUpdateConflicts(skipIdx) {
+      const dups = cardConflictDates();
+      for (let i = 0; i < CARD_ROWS; i++) { if (i !== skipIdx) cardRenderExam(i, dups); }
+    }
+    // ---- 대학별 고사일: 고사일 정리표(CARD_SCHED) 우선 매칭 ----
+    function cardSNU(s) {
+      let x = loose(s).replace(/대학교/g, '대');
+      [['여자대', '여대'], ['외국어대', '외대'], ['공과대', '공대'], ['과학기술대', '과기대'], ['예술대', '예대'], ['신학대', '신대'], ['교육대', '교대']].forEach(p => { x = x.split(p[0]).join(p[1]); });
+      return x;
+    }
+    function cardSNT(s) {
+      let x = loose(s);
+      ['학생부교과', '학생부종합', '학생부위주', '실기실적', '실기위주', '실적위주', '위주', '전형'].forEach(w => { x = x.split(w).join(''); });
+      return x || loose(s);
+    }
+    function cardTMatch(a, b) { return !!a && !!b && (a === b || a.includes(b) || b.includes(a)); }
+    function cardMajorHit(m, lm) {
+      if (!m) return false;
+      const ml = loose(m);
+      if (/전모집단위|전체모집단위|단일계열|전학과|전모집|전계열/.test(ml)) return true;
+      if (!lm) return false;
+      if (ml === lm || ml.includes(lm)) return true;
+      return text(m).split(/[,，·・\/]/).some(it => {
+        const li = loose(it);
+        return li.length >= 2 && (li === lm || li.includes(lm) || (li.length >= 3 && lm.includes(li)));
+      });
+    }
+    function cardMLabel(m) {
+      const s = text(m).trim();
+      if (!s) return '';
+      if (/전\s*모집단위|전체|단일계열/.test(s)) return '[전체]';
+      const first = s.split(/[,，\/]/)[0].trim();
+      let lab = first.length > 12 ? first.slice(0, 11) + '…' : first;
+      if (/[,，\/]/.test(s)) lab += ' 외';
+      return '[' + lab + ']';
+    }
+    function cardSchedText(uni, typeName, major, typeKind) {
+      if (typeof CARD_SCHED === 'undefined' || !uni || !typeName) return '';
+      const un = cardSNU(uni);
+      if (!un) return '';
+      let uRows = CARD_SCHED.filter(e => cardSNU(e[0]) === un);
+      if (!uRows.length) uRows = CARD_SCHED.filter(e => { const n = cardSNU(e[0]); return n.includes(un) || un.includes(n); });
+      if (!uRows.length) return '';
+      const tn = cardSNT(typeName);
+      // 전형유형(교과/종합/논술/실기)이 다른 고사일정과 잘못 매칭되는 것 방지
+      const schedKind = v => {
+        const s = text(v).trim();
+        if (!s) return '';
+        if (s.indexOf('종합') !== -1) return '학생부종합';
+        if (s.indexOf('논술') !== -1) return '논술';
+        if (s.indexOf('교과') !== -1) return '학생부교과';
+        if (s.indexOf('실기') !== -1 || s.indexOf('실적') !== -1) return '실기/실적';
+        return '';
+      };
+      const rk = schedKind(typeKind);
+      const tRows = uRows.filter(e => {
+        const ek = schedKind(e[1]);
+        if (rk && ek && ek !== rk) return false;
+        return cardTMatch(cardSNT(e[1]), tn) && text(e[4]).trim() && text(e[4]).indexOf('없음') === -1;
+      });
+      if (!tRows.length) return '';
+      const lm = loose(major);
+      const mRows = tRows.filter(e => cardMajorHit(e[3], lm));
+      const use = mRows.length ? mRows : tRows;
+      const exact = mRows.length > 0;
+      const parts = [];
+      ['면접', '논술', '실기'].forEach(kind => {
+        const ks = use.filter(e => text(e[2]).indexOf(kind) !== -1);
+        if (!ks.length) return;
+        if (exact) {
+          const ds = [];
+          ks.forEach(e => { const d = text(e[4]).trim(); if (ds.indexOf(d) === -1) ds.push(d); });
+          parts.push(kind + ' ' + ds.slice(0, 3).join(' / '));
+        } else {
+          parts.push(kind + ' ' + ks.slice(0, 4).map(e => cardMLabel(e[3]) + ' ' + text(e[4]).trim()).join(' / ') + (ks.length > 4 ? ' 외' : ''));
+        }
+      });
+      return parts.join('\n');
+    }
+    function cardExamText(r) {
+      const parts = [];
+      [['면접', '면접고사일'], ['논술', '논술고사일'], ['실기', '실기고사일']].forEach(([lab, k]) => {
+        let v = text(r[k]).trim();
+        if (!v || /^(해당\s*없음|없음|-+|X|x)$/.test(v) || v.indexOf('미실시') !== -1) return;
+        if (CARD_DATEISH_RE.test(v)) {
+          // 날짜 앞의 불필요한 문구(예: '면접 실시 ', '면접고사 ')는 잘라내고 날짜부터 표시
+          const m = CARD_DATE_RE.exec(v); CARD_DATE_RE.lastIndex = 0;
+          if (m && m.index > 0 && !/[\d~(]/.test(v.slice(0, m.index).trim().slice(-1) || '')) {
+            const head = v.slice(0, m.index).trim();
+            if (head && !/의예과|모집단위|학과|전공|인문|자연|예체능/.test(head) && /실시|고사|면접|논술|실기|일정/.test(head)) v = v.slice(m.index).trim();
+          }
+          parts.push(lab + ' ' + v);
+        } else {
+          parts.push(lab + ' 일정 요강확인');
+        }
+      });
+      return parts.join('\n');
+    }
+    const CARD_KEYWORD_MAP = [
+      ['1단계성적', '__s1'], ['1단계 성적', '__s1'], ['1단계', '__s1'],
+      ['학생부교과', '학생부'], ['학생부종합평가', '서류'], ['종합평가', '서류'], ['서류평가', '서류'], ['서류', '서류'],
+      ['면접평가', '면접'], ['심층면접', '면접'], ['면접', '면접'],
+      ['논술', '논술'], ['실기', '실기'], ['실적', '실기'], ['적성', '적성'],
+      ['교과성적', '학생부'], ['교과', '학생부'], ['출결', '학생부'], ['출석', '학생부'], ['봉사', '학생부'], ['내신', '학생부'], ['학생부', '학생부'], ['학교생활기록부', '학생부']
+    ];
+    const CARD_KEYWORD_RE = new RegExp('(' + CARD_KEYWORD_MAP.map(p => p[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'g');
+    function cardKeyCol(k) { const f = CARD_KEYWORD_MAP.find(p => p[0] === k); return f ? f[1] : null; }
+    function cardParseElems(seg) {
+      const pct = {}; let s1 = null;
+      const depthAt = [];
+      { let d = 0; for (let i = 0; i < seg.length; i++) { const ch = seg[i]; if (ch === '(' || ch === '[') d++; depthAt.push(d); if ((ch === ')' || ch === ']') && d > 0) d--; } }
+      const hits = [];
+      let m;
+      CARD_KEYWORD_RE.lastIndex = 0;
+      while ((m = CARD_KEYWORD_RE.exec(seg)) !== null) {
+        if (depthAt[m.index] > 0 && cardKeyCol(m[0]) !== '__s1') continue; // 괄호 안 설명어는 무시
+        hits.push({ i: m.index, end: m.index + m[0].length, col: cardKeyCol(m[0]) });
+      }
+      for (let h = 0; h < hits.length; h++) {
+        const from = hits[h].end;
+        const to = h + 1 < hits.length ? hits[h + 1].i : seg.length;
+        const sub = seg.slice(from, to);
+        let val = null;
+        const pm = sub.match(/([\d.]+)\s*%/);
+        if (pm) val = parseFloat(pm[1]);
+        else {
+          const nm = sub.match(/(?:^|[^\d.,])(\d{1,3})(?:[^\d%배.]|$)/);
+          if (nm && +nm[1] <= 100) val = +nm[1];
+        }
+        if (val == null || !(val > 0)) continue;
+        if (hits[h].col === '__s1') { if (s1 == null) s1 = val; }
+        else pct[hits[h].col] = (pct[hits[h].col] || 0) + val;
+      }
+      return { pct, s1 };
+    }
+    function cardParseMethod(method) {
+      const m = text(method);
+      const stages = cardBlankStages();
+      const setPct = (idx, pctObj) => { CARD_ELEMS.forEach(e => { if (pctObj[e]) stages[idx].pct[e] = String(Math.round(pctObj[e] * 10) / 10); }); };
+      const i1 = m.search(/1\s*단계/);
+      const i2 = m.search(/2\s*단계/);
+      if (i1 >= 0 && i2 > i1) {
+        const seg1 = m.slice(i1, i2);
+        const seg2 = m.slice(i2);
+        const p1 = cardParseElems(seg1);
+        const p2 = cardParseElems(seg2.replace(/^2\s*단계/, ''));
+        setPct(1, p1.pct);
+        const mult = seg1.match(/([\d.]+)\s*배수/) || m.slice(0, i1).match(/([\d.]+)\s*배수/);
+        if (mult) stages[1].ratio = mult[1] + '배수';
+        setPct(2, p2.pct);
+        if (p2.s1 != null) {
+          let best = '서류', bv = -1;
+          CARD_ELEMS.forEach(e => { const v = parseFloat(stages[1].pct[e]); if (Number.isFinite(v) && v > bv) { bv = v; best = e; } });
+          const cur = parseFloat(stages[2].pct[best]);
+          stages[2].pct[best] = String((Number.isFinite(cur) ? cur : 0) + p2.s1);
+        }
+      } else {
+        const p = cardParseElems(m);
+        setPct(0, p.pct);
+      }
+      return stages;
+    }
+    function cardFillFromRow(idx, r) {
+      cardAcHide();
+      const row = cardState.rows[idx];
+      row.uni = text(r['대학명']).trim();
+      row.major = text(r['학과명']).trim();
+      row.typeName = text(r['전형명']).trim();
+      row.typeKind = cardNormKind(r['전형유형']);
+      row.quota = text(r['2027 모집인원']).trim();
+      row.comp = text(r['2026경쟁률']).trim();
+      row.c50 = text(r['50%컷']).trim(); row.c70 = text(r['70%컷']).trim();
+      row.cavg = text(r['최초합격자평균']).trim() || text(r['평균']).trim();
+      row.avg = text(r['최초합격자평균']).trim() || text(r['평균']).trim()
+        || (text(r['50%컷']).trim() ? text(r['50%컷']).trim() + '(50%컷)' : '')
+        || (text(r['70%컷']).trim() ? text(r['70%컷']).trim() + '(70%컷)' : '');
+      row.exam = cardSchedText(row.uni, row.typeName, row.major, row.typeKind) || cardExamText(r);
+      const mr = cardParseMinreq(r['2027수능최저학력기준']);
+      row.minreq = mr.short; row.minreqFull = mr.full;
+      row.stages = cardParseMethod(r['2027 전형방법']);
+      row.filledKey = loose(row.uni) + '|' + loose(row.typeName) + '|' + loose(row.major);
+      cardRenderRow(idx);
+      cardUpdateConflicts();
+      cardSave();
+    }
+    function cardAmbiguousWhileTyping(val, cands) {
+      // 입력 중인 값이 다른 후보의 앞부분이기도 하면(예: '한양대' vs '한양대(에리카)') 확정하지 않고 대기
+      const lv = loose(val);
+      if (!lv) return true;
+      let exact = false, longer = 0;
+      for (const c of cands) {
+        const lc = loose(typeof c === 'string' ? c : c.v);
+        if (lc === lv) exact = true;
+        else if (lc.startsWith(lv)) longer++;
+      }
+      return !exact || longer > 0;
+    }
+    function cardTryAutofill(idx, typingField) {
+      const row = cardState.rows[idx];
+      buildCardIndex();
+      if (!row.uni || !row.major) return;
+      if (typingField === 'uni' && cardAmbiguousWhileTyping(row.uni, cardUniNames)) return;
+      // 대학명: 정확히 없으면 느슨한(공백·기호 무시) 일치로 해석
+      const lu = loose(row.uni);
+      const uni = cardByUni.has(row.uni.trim()) ? row.uni.trim() : cardUniNames.find(u => loose(u) === lu);
+      if (!uni) return;
+      if (!cardByUni.has(uni)) { ensureUni(uni, () => cardTryAutofill(idx)); return; }
+      let list = cardByUni.get(uni);
+      if (typingField === 'major' && cardAmbiguousWhileTyping(row.major, list.map(r => text(r['학과명'])))) return;
+      if (typingField === 'typeName' && row.typeName && cardAmbiguousWhileTyping(row.typeName, list.map(r => text(r['전형명'])))) return;
+      const lm = loose(row.major);
+      list = list.filter(r => loose(r['학과명']) === lm);
+      if (!list.length) return;
+      const lt = loose(row.typeName);
+      if (lt) {
+        let sub = list.filter(r => loose(r['전형명']) === lt);
+        if (!sub.length) {
+          // 부분일치: 입력한 문구를 포함하는 전형명이 하나뿐이면 그 전형으로 해석 (예: '융합형인재' -> 'CAU융합형인재')
+          const inc = list.filter(r => loose(r['전형명']).includes(lt));
+          const names = new Set(inc.map(r => loose(r['전형명'])));
+          if (names.size === 1) sub = inc;
+        }
+        list = sub;
+        if (!list.length) return; // 자료에 없는 전형은 수동 입력값 유지
+      } else {
+        // 전형명이 비어 있어도 해당 학과의 전형이 하나뿐이면 자동 선택
+        const uniq = new Set(list.map(r => text(r['전형명']).trim()));
+        if (uniq.size !== 1) return;
+      }
+      const key = loose(list[0]['대학명']) + '|' + loose(list[0]['전형명']) + '|' + loose(list[0]['학과명']);
+      if (row.filledKey === key) return; // 이미 채운 조합이면 수기 수정 보호를 위해 다시 덮어쓰지 않음
+      cardFillFromRow(idx, list[0]);
+    }
+    // ---- 자동완성 드롭다운 ----
+    let cardAcInput = null;
+    function cardAcBox() {
+      let box = el('cardAcBox');
+      if (!box) { box = document.createElement('div'); box.id = 'cardAcBox'; box.className = 'card-ac-box'; document.body.appendChild(box); }
+      return box;
+    }
+    function cardAcHide() { const box = el('cardAcBox'); if (box) box.style.display = 'none'; cardAcInput = null; }
+    function cardAcShow(input, items, onPick) {
+      const box = cardAcBox();
+      cardAcInput = input;
+      if (!items.length) { box.style.display = 'none'; return; }
+      const countBar = items.length > 12 ? `<div class="card-ac-count">${items.length}개 · ↑↓ 키 또는 스크롤로 탐색</div>` : '';
+      box.innerHTML = countBar + items.map((it, i) => {
+        const v = typeof it === 'string' ? it : it.v;
+        const meta = typeof it === 'string' ? '' : (it.m || '');
+        return `<div class="card-ac-item" data-i="${i}" data-v="${escapeAttr(v)}"><span>${escapeHtml(v)}</span>${meta ? `<span class="ac-meta">${escapeHtml(meta)}</span>` : ''}</div>`;
+      }).join('');
+      // 입력칸 아래 공간이 좁으면 위로 펼치고, 높이는 화면에 맞게 조절 (스크롤바가 항상 화면 안에 보이도록)
+      const rect = input.getBoundingClientRect();
+      const margin = 10;
+      const spaceBelow = window.innerHeight - rect.bottom - margin;
+      const spaceAbove = rect.top - margin;
+      const placeAbove = spaceBelow < 200 && spaceAbove > spaceBelow;
+      const maxH = Math.max(140, Math.min(340, Math.round(placeAbove ? spaceAbove : spaceBelow)));
+      box.style.maxHeight = maxH + 'px';
+      box.style.left = Math.round(rect.left + window.scrollX) + 'px';
+      box.style.minWidth = Math.max(180, Math.round(rect.width)) + 'px';
+      box.style.display = 'block';
+      box.scrollTop = 0;
+      box.style.top = Math.round(placeAbove
+        ? rect.top + window.scrollY - 2 - box.offsetHeight
+        : rect.bottom + window.scrollY + 2) + 'px';
+      box.querySelectorAll('.card-ac-item').forEach(elm => {
+        elm.addEventListener('mousedown', ev => { ev.preventDefault(); onPick(elm.dataset.v); cardAcHide(); });
+      });
+    }
+    document.addEventListener('click', e => { if (cardAcInput && !e.target.closest('#cardAcBox') && e.target !== cardAcInput) cardAcHide(); });
+    // 페이지 스크롤 시에만 닫기 — 드롭다운 내부 스크롤(휠·스크롤바 드래그)은 유지
+    window.addEventListener('scroll', e => {
+      const t = e.target;
+      if (t && t.nodeType === 1 && t.closest && t.closest('#cardAcBox')) return;
+      cardAcHide();
+    }, true);
+    function cardAcFor(input) {
+      const idx = +input.dataset.r;
+      const field = input.dataset.f;
+      const row = cardState.rows[idx];
+      buildCardIndex();
+      let items = [];
+      if (field === 'uni') items = cardAcRank(input.value, cardUniNames);
+      else if (field === 'typeName') {
+        if (!cardByUni.has(row.uni)) { const u = uniResolve(row.uni); if (u) ensureUni(u, () => { if (document.activeElement === input) cardAcFor(input); }); return cardAcHide(); }
+        let cands = cardTypeCands(row.uni, row.major);
+        if (row.typeKind && row.typeKind !== '기타') cands = cands.filter(c => c.m === row.typeKind);
+        items = cardAcRank(input.value, cands);
+      } else if (field === 'major') {
+        if (!cardByUni.has(row.uni)) { const u = uniResolve(row.uni); if (u) ensureUni(u, () => { if (document.activeElement === input) cardAcFor(input); }); return cardAcHide(); }
+        items = cardAcRank(input.value, cardMajorCands(row.uni, row.typeName));
+      }
+      cardAcShow(input, items, v => {
+        input.value = v;
+        row[field] = v;
+        if (field === 'uni') {
+          // 대학을 고르는 순간 그 대학 파일만 불러오고, 도착한 뒤에 전형·학과를 확인한다
+          ensureUni(v, () => {
+            if (row.typeName && !cardRowsFor(row.uni, row.typeName, '').length) { row.typeName = ''; const t = cardCell(idx, 'typeName'); if (t) t.value = ''; }
+            if (row.major && !cardRowsFor(row.uni, '', row.major).length) { row.major = ''; const t = cardCell(idx, 'major'); if (t) t.value = ''; }
+            cardSave();
+            cardTryAutofill(idx);
+          });
+          cardSave();
+          return;
+        }
+        cardSave();
+        cardTryAutofill(idx);
+      });
+    }
+    function cardCell(idx, f) { const p = el('cardPanel'); return p ? p.querySelector(`[data-r="${idx}"][data-f="${f}"]`) : null; }
+    function cardStageCell(idx, s, f) { const p = el('cardPanel'); return p ? p.querySelector(`[data-r="${idx}"][data-s="${s}"][data-f="${f}"]`) : null; }
+    // ---- 렌더링 ----
+    function cardHeaderHtml() {
+      const h = cardState.header;
+      const inp = (k, w) => `<input data-h="${k}" value="${escapeAttr(h[k] || '')}"${w ? ` style="width:${w}"` : ''}>`;
+      const ox = k => `<span class="card-ox" data-ox="${k}" title="클릭하면 O → X → 빈칸 순으로 바뀝니다">${escapeHtml(h[k] || '')}</span>`;
+      return `
+      <h2 class="card-title">2027학년도 대입전형 수시 지원 상담카드</h2>
+      <div class="card-idrow"><span style="margin-right:auto;font-weight:600;font-size:11.5px;color:#444;">제작: 운정고등학교 이재규</span>학번(${inp('hakbun')}) &nbsp;이름(${inp('name')}) &nbsp;내신성적(${inp('naeshin')})</div>
+      <div class="card-sec-label">1. 자신이 생각하는 입시 전략을 쓰고 해당하는 것을 선택하세요.(해당하는 곳에 모두 표시, 복수 선택하세요.)</div>
+      <table class="card-info">
+        <colgroup><col style="width:11%"><col style="width:22%"><col style="width:11%"><col style="width:23%"><col style="width:11%"><col style="width:22%"></colgroup>
+        <tr><th>희망 진로</th><td>${inp('jinro')}</td><th>희망 학과</th><td>${inp('hgwa')}</td><th>★ 상담 희망</th><td>방학중 (${ox('banghakjung')}), 방학후 (${ox('bangakhu')})</td></tr>
+        <tr><th>전문대와 4년제</th><td colspan="2">전문대 (${ox('jeonmun')})&nbsp;&nbsp; 4년제 (${ox('univ4')})</td><th>수시와 정시</th><td colspan="2">수시 (${ox('susi')})&nbsp;&nbsp; 정시 (${ox('jeongsi')})</td></tr>
+        <tr><th>수시 응시 전형</th><td colspan="5">교과 (${inp('gyogwa', '40px')})&nbsp; 종합 (${inp('jonghap', '40px')})&nbsp; 적성 (${inp('jukseong', '40px')})&nbsp; 논술 (${inp('nonsul', '40px')})&nbsp; 실기 (분야: ${inp('silgi', '90px')})&nbsp; 기타 (세부전형: ${inp('gita', '110px')})</td></tr>
+        <tr><th>모의고사 등급<br><span style="font-weight:400;font-size:11px">(수능최저 추정용)</span></th><td colspan="5">국어 (${inp('m_kor', '34px')})&nbsp; 수학 (${inp('m_math', '34px')})&nbsp; 영어 (${inp('m_eng', '34px')})&nbsp; 탐구1 (${inp('m_t1', '34px')})&nbsp; 탐구2 (${inp('m_t2', '34px')})&nbsp; 한국사 (${inp('m_hist', '34px')}) <span style="color:#555;font-size:11px">· 최근 모의고사 등급을 숫자로</span></td></tr>
+      </table>
+      <div class="card-sec-label">2. 자신이 지원할 대학과 학과에 대해 조사하고 빈칸을 채워 봅시다.</div>`;
+    }
+    function cardRowHtml(idx) {
+      const stageNames = ['일괄합산', '1단계', '2단계'];
+      let html = '';
+      for (let s = 0; s < 3; s++) {
+        html += '<tr>';
+        if (s === 0) {
+          html += `<td rowspan="3"><strong>${idx + 1}</strong><button type="button" class="card-clear-row no-print" data-clear="${idx}" title="이 행 지우기">지움</button></td>`;
+          html += `<td rowspan="3"><input class="card-ac" data-r="${idx}" data-f="uni" autocomplete="off" placeholder=""></td>`;
+          html += `<td rowspan="3"><input class="card-ac" data-r="${idx}" data-f="major" autocomplete="off"></td>`;
+          html += `<td rowspan="3" class="card-typecell"><select class="tk card-kind" data-r="${idx}" data-f="typeKind" title="전형유형 선택"><option value=""></option><option>학생부교과</option><option>학생부종합</option><option>논술</option><option>실기/실적</option><option>기타</option></select><input class="card-ac" data-r="${idx}" data-f="typeName" autocomplete="off" placeholder=""></td>`;
+          html += `<td rowspan="3"><input data-r="${idx}" data-f="quota"></td>`;
+          html += `<td rowspan="3"><input data-r="${idx}" data-f="comp"></td>`;
+          html += `<td rowspan="3"><input data-r="${idx}" data-f="avg"></td>`;
+          html += `<td rowspan="3"><input data-r="${idx}" data-f="conv"></td>`;
+        }
+        html += `<td class="card-stage-label">${stageNames[s]}</td>`;
+        html += `<td><input data-r="${idx}" data-s="${s}" data-f="ratio"></td>`;
+        CARD_ELEMS.forEach(e2 => { html += `<td><input data-r="${idx}" data-s="${s}" data-f="pct-${e2}"></td>`; });
+        if (s === 0) html += `<td rowspan="3"><div class="card-ce" contenteditable="true" data-r="${idx}" data-f="minreq"></div></td>`;
+        html += `<td class="card-strat" data-r="${idx}" data-strat="${['상향', '적정', '안정'][s]}">${['상향', '적정', '안정'][s]}</td>`;
+        if (s === 0) html += `<td rowspan="3" class="card-examcell"><div class="card-ce" contenteditable="true" data-r="${idx}" data-f="exam"></div></td>`;
+        html += '</tr>';
+      }
+      return `<tbody class="card-rowgroup">${html}</tbody>`;
+    }
+    function cardTableHtml() {
+      let bodies = '';
+      for (let i = 0; i < CARD_ROWS; i++) bodies += cardRowHtml(i);
+      return `
+      <table class="card-main">
+        <colgroup>
+          <col style="width:3%"><col style="width:8.2%"><col style="width:8.8%"><col style="width:9.6%">
+          <col style="width:3.6%"><col style="width:4.4%"><col style="width:5.2%"><col style="width:4.6%">
+          <col style="width:5%"><col style="width:4.4%">
+          <col style="width:4.2%"><col style="width:4.2%"><col style="width:4.2%"><col style="width:4.2%"><col style="width:4.2%"><col style="width:4.2%">
+          <col style="width:5.6%"><col style="width:4.2%"><col style="width:8.6%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th rowspan="2">순</th><th rowspan="2">대학명</th><th rowspan="2">학과</th><th rowspan="2">전형유형<hr style="margin:2px 0;border:none;border-top:1px solid #999">세부전형명</th>
+            <th rowspan="2">모집<br>인원</th><th rowspan="2">전년도<br>경쟁률</th><th rowspan="2">전년도<br>합격자<br>평균등급</th><th rowspan="2">대학별<br>환산등급</th>
+            <th rowspan="2">전형단계</th><th rowspan="2">선발<br>비율</th>
+            <th colspan="6">전형요소 및 반영비율</th>
+            <th rowspan="2">수능<br>최저</th><th rowspan="2">지원<br>전략</th>
+            <th rowspan="2">대학별 고사일<br>(면접·논술·실기)</th>
+          </tr>
+          <tr><th>학생부<br>%</th><th>서류<br>%</th><th>면접<br>%</th><th>적성<br>%</th><th>논술<br>%</th><th>실기<br>%</th></tr>
+        </thead>
+        ${bodies}
+      </table>
+      <div class="card-notes">
+        <p>※ 4년제 대학은 6개 대학(6개 전형) 지원 가능하며, 사관학교, 경찰대, 과학기술원(KAIST·GIST·DGIST·UNIST·한국에너지공대)은 지원 횟수의 제한이 없음</p>
+        <p>※ '어디가' 사이트나 각 학교 홈페이지 -'입학처-모집요강, 입시결과'에서 찾아 정리하기를 권장함</p>
+      </div>`;
+    }
+    function cardTeacherHtml() {
+      let trs = '';
+      for (let i = 0; i < CARD_TCH_ROWS; i++) {
+        trs += `<tr>
+          <th>${i + 1}차</th>
+          <td><input data-t="d${i}" placeholder=""></td>
+          <td><div class="card-ce card-tce" contenteditable="true" data-t="c${i}"></div></td>
+          <td><input data-t="s${i}"></td>
+        </tr>`;
+      }
+      return `
+      <div class="card-teacher-wrap">
+        <div class="card-sec-label">3. 담임교사 상담 기록 <span class="no-print" style="font-weight:600;color:#555;">(교사 작성 · 자동 저장)</span></div>
+        <table class="card-info card-teacher">
+          <colgroup><col style="width:4.5%"><col style="width:11%"><col style="width:70.5%"><col style="width:14%"></colgroup>
+          <tr>
+            <th>회차</th><th>상담 일자</th>
+            <th>상담 내용 및 지도 조언 (지원 대학·전형의 적정성, 수능최저 충족 가능성, 대학별 고사 준비, 변경·보완 사항 등)</th>
+            <th>학생/학부모 확인</th>
+          </tr>
+          ${trs}
+          <tr>
+            <th colspan="2">담임교사 종합 의견</th>
+            <td colspan="2"><div class="card-ce card-tce" contenteditable="true" data-t="final"></div></td>
+          </tr>
+        </table>
+      </div>`;
+    }
+    function cardRenderRow(idx) {
+      const row = cardState.rows[idx];
+      [['uni', 'uni'], ['major', 'major'], ['typeName', 'typeName'], ['quota', 'quota'], ['comp', 'comp'], ['avg', 'avg'], ['conv', 'conv']].forEach(([f]) => {
+        const c = cardCell(idx, f); if (c) c.value = row[f] || '';
+      });
+      const tk = cardCell(idx, 'typeKind');
+      if (tk) {
+        const v = row.typeKind || '';
+        if (v && !Array.from(tk.options).some(o => o.value === v)) { const o = document.createElement('option'); o.textContent = v; tk.appendChild(o); }
+        tk.value = v;
+      }
+      cardRenderExam(idx, cardConflictDates());
+      const mr = cardCell(idx, 'minreq'); if (mr) { mr.innerText = row.minreq || ''; mr.title = row.minreqFull || ''; }
+      for (let s = 0; s < 3; s++) {
+        const rc = cardStageCell(idx, s, 'ratio'); if (rc) rc.value = row.stages[s].ratio || '';
+        CARD_ELEMS.forEach(e2 => { const c = cardStageCell(idx, s, 'pct-' + e2); if (c) c.value = row.stages[s].pct[e2] || ''; });
+      }
+      const p = el('cardPanel');
+      p.querySelectorAll(`.card-strat[data-r="${idx}"]`).forEach(c => c.classList.toggle('picked', c.dataset.strat === row.strategy));
+      const filled = !!(row.uni || row.major || row.typeName);
+      p.querySelectorAll(`[data-r="${idx}"]`).forEach(c => { const td = c.closest('td'); if (td) td.classList.toggle('card-filled', filled); });
+    }
+    /* ===== 3단계: 내 성적으로 입결 위치 · 수능최저 충족 추정 =====
+       · 대학별 환산등급은 대학마다 반영 교과·학년 비율이 달라 계산하지 않는다.
+         학생이 '대학별 환산등급' 칸에 적으면 그 값을, 없으면 '내신성적'을 비교에 쓴다.
+       · 기준(교사가 조정): 50%컷보다 SAFE_GAP 이상 좋으면 안정, 70%컷 이내면 적정,
+         70%컷보다 REACH_GAP 이내로 나쁘면 상향, 그 밖은 소신                          */
+    const SAFE_GAP = 0.3, REACH_GAP = 0.5;
+    const num = v => { const x = parseFloat(text(v).replace(/[^0-9.]/g, '')); return Number.isFinite(x) ? x : NaN; };
+    function judgeRow(row, myGrade) {
+      if (!Number.isFinite(myGrade)) return { v: '', msg: '내 등급 입력 필요' };
+      let c50 = num(row.c50), c70 = num(row.c70), cav = num(row.cavg);
+      if (!Number.isFinite(c50) && !Number.isFinite(c70) && !Number.isFinite(cav)) {
+        const a = num(row.avg); if (Number.isFinite(a)) cav = a;
+      }
+      const ref50 = Number.isFinite(c50) ? c50 : cav;
+      const ref70 = Number.isFinite(c70) ? c70 : ref50;
+      if (!Number.isFinite(ref50) && !Number.isFinite(ref70)) return { v: '', msg: '입결 없음' };
+      if ((ref50 || ref70) > 9) return { v: '', msg: '점수형 입결(비교 불가)' };
+      let v;
+      if (Number.isFinite(ref50) && myGrade <= ref50 - SAFE_GAP) v = '안정';
+      else if (myGrade <= ref70) v = '적정';
+      else if (myGrade <= ref70 + REACH_GAP) v = '상향';
+      else v = '소신';
+      const note = row.typeKind === '학생부종합' ? '종합: 서류 비중 커 참고만' : '';
+      return { v, msg: note, ref: (Number.isFinite(c50) ? c50 : '-') + ' / ' + (Number.isFinite(c70) ? c70 : (Number.isFinite(cav) ? '평균 ' + cav : '-')) };
+    }
+    function minCheck(full, h) {
+      const t = text(full).trim();
+      if (!t) return { cls: 'na', msg: '' };
+      if (t.length < 30 && /미반영|^없음|해당\s*없음/.test(t)) return { cls: 'ok', msg: '최저 없음' };
+      const g = k => { const x = num(h[k]); return x >= 1 && x <= 9 ? x : NaN; };
+      const kor = g('m_kor'), math = g('m_math'), eng = g('m_eng'), t1 = g('m_t1'), t2 = g('m_t2'), hist = g('m_hist');
+      if ([kor, math, eng, t1].some(x => !Number.isFinite(x))) return { cls: 'na', msg: '모의 등급 입력 시 추정' };
+      let tam = Number.isFinite(t2) ? Math.min(t1, t2) : t1;
+      if (/2\s*과목\s*평균/.test(t) && Number.isFinite(t2)) { tam = (t1 + t2) / 2; if (/버림|절사/.test(t)) tam = Math.floor(tam); }
+      const multi = (t.match(/\d\s*개\s*(?:영역)?[^0-9]{0,24}?합\s*\d{1,2}/g) || []).length > 1;
+      let ok = null;
+      const m = t.match(/(\d)\s*개\s*(?:영역)?[^0-9]{0,24}?합\s*(\d{1,2})/);
+      if (m) {
+        let areas = [kor, math, eng, tam];
+        if (/영어\s*(?:를|은)?\s*제외/.test(t)) areas = [kor, math, tam];
+        const n = +m[1], lim = +m[2];
+        const sum = areas.slice().sort((a, b) => a - b).slice(0, n).reduce((a, b) => a + b, 0);
+        ok = sum <= lim;
+      } else {
+        const m2 = t.match(/(\d)\s*개\s*(?:영역|과목)?\s*1\s*등급/) || t.match(/1\s*등급\s*(\d)\s*개/);
+        if (m2) ok = [kor, math, eng, tam].filter(x => x === 1).length >= +m2[1];
+      }
+      const em = t.match(/영어\s*(?:등급)?\s*(\d)\s*(?:등급)?\s*(?:이내|이하)/);
+      if (em) ok = (ok === null ? true : ok) && eng <= +em[1];
+      const hm = t.match(/한국사\s*(?:등급)?\s*(\d)\s*(?:등급)?\s*(?:이내|이하)/);
+      if (hm && Number.isFinite(hist)) ok = (ok === null ? true : ok) && hist <= +hm[1];
+      if (ok === null) return { cls: 'na', msg: '요강 확인' };
+      return { cls: ok ? 'ok' : 'no', msg: (ok ? '충족' : '미충족') + '(추정)' + (multi ? ' · 계열별 기준 확인' : '') };
+    }
+    function analyzeRows() {
+      const h = cardState.header;
+      const base = num(h.naeshin);
+      const out = [];
+      cardState.rows.forEach((row, i) => {
+        if (!(row.uni || row.major || row.typeName)) return;
+        const conv = num(row.conv);
+        const my = Number.isFinite(conv) ? conv : base;
+        const j = judgeRow(row, my);
+        const mc = minCheck(row.minreqFull || row.minreq, h);
+        out.push({ i, row, my, src: Number.isFinite(conv) ? '환산' : '내신', j, mc });
+      });
+      return out;
+    }
+    function renderAnalysis() {
+      const box = el('anPanel');
+      if (!box || !cardState) return;
+      const list = analyzeRows();
+      const p = el('cardPanel');
+      p.querySelectorAll('.card-strat.suggest').forEach(c => c.classList.remove('suggest'));
+      list.forEach(a => {
+        const s = a.j.v === '안정' ? '안정' : a.j.v === '적정' ? '적정' : a.j.v ? '상향' : '';
+        if (s) { const c = p.querySelector(`.card-strat[data-r="${a.i}"][data-strat="${s}"]`); if (c) c.classList.add('suggest'); }
+      });
+      if (!list.length) { box.innerHTML = ''; return; }
+      const trs = list.map(a => `<tr><td>${a.i + 1}</td><td class="l">${escapeHtml(a.row.uni)} · ${escapeHtml(a.row.major)}<br><span style="color:#555">${escapeHtml(a.row.typeName)}</span></td>
+        <td>${escapeHtml(a.j.ref || '-')}</td><td>${Number.isFinite(a.my) ? a.my + ' (' + a.src + ')' : '-'}</td>
+        <td>${a.j.v ? `<span class="v-${a.j.v}">${a.j.v}</span>` : ''}${a.j.msg ? `<br><span class="na">${escapeHtml(a.j.msg)}</span>` : ''}</td>
+        <td>${escapeHtml(a.row.minreq || '').replace(/\n/g, '<br>')}</td><td class="${a.mc.cls}">${escapeHtml(a.mc.msg)}</td></tr>`).join('');
+      box.innerHTML = `<div class="an-wrap"><div class="card-sec-label">※ 내 성적으로 본 위치 (자동 추정 · 참고용)</div>
+        <p class="an-note">입결 50%컷보다 ${SAFE_GAP} 이상 좋으면 안정, 70%컷 이내면 적정, 70%컷보다 ${REACH_GAP} 이내면 상향, 그 밖은 소신. 대학별 환산등급 칸에 값을 적으면 그 값으로 비교한다. 지원전략 칸의 점선은 추정 결과이고, 최종 선택은 직접 클릭한다.</p>
+        <table class="an-table"><colgroup><col style="width:4%"><col style="width:26%"><col style="width:13%"><col style="width:11%"><col style="width:14%"><col style="width:16%"><col style="width:16%"></colgroup>
+        <tr><th>순</th><th>대학 · 학과 · 전형</th><th>입결 50% / 70%</th><th>비교 등급</th><th>입결 판정</th><th>수능최저</th><th>최저 충족</th></tr>${trs}</table></div>`;
+    }
+    /* ===== 3단계: 교사에게 제출 → 교사 구글 시트에 누적 ===== */
+    function submitCard() {
+      const h = cardState.header;
+      const msg = el('cardSubmitMsg'), btn = el('cardSubmitBtn');
+      const say = (t, cls) => { msg.textContent = t; msg.className = 'card-hint ' + (cls || ''); };
+      const id = text(h.hakbun).trim(), name = text(h.name).trim();
+      if (!/^\d{4,6}$/.test(id)) { say('맨 위 학번 칸에 숫자 4~6자리를 적어 줘.', 'errmsg'); return; }
+      if (!name) { say('맨 위 이름 칸을 채워 줘.', 'errmsg'); return; }
+      const list = analyzeRows();
+      if (!list.length) { say('지원 대학을 한 곳 이상 적어 줘.', 'errmsg'); return; }
+      const payload = {
+        studentId: id, name: name,
+        header: { naeshin: h.naeshin, jinro: h.jinro, hgwa: h.hgwa, m_kor: h.m_kor, m_math: h.m_math, m_eng: h.m_eng, m_t1: h.m_t1, m_t2: h.m_t2, m_hist: h.m_hist },
+        rows: list.map(a => ({
+          no: a.i + 1, uni: a.row.uni, major: a.row.major, typeKind: a.row.typeKind, typeName: a.row.typeName,
+          quota: a.row.quota, comp: a.row.comp, avg: a.row.avg, conv: a.row.conv,
+          myGrade: Number.isFinite(a.my) ? a.my : '', verdict: a.j.v || a.j.msg,
+          minreq: a.row.minreqFull || a.row.minreq, minOk: a.mc.msg, strategy: a.row.strategy, exam: a.row.exam
+        }))
+      };
+      btn.disabled = true; say('제출하는 중…');
+      call('submitCard', payload).then(res => {
+        btn.disabled = false;
+        say(`제출 완료 · ${res.count}개 지원 · ${res.attempt}회차 · ${res.time}`, 'okmsg');
+      }).catch(err => {
+        btn.disabled = false;
+        say('제출하지 못했다: ' + (err && err.message ? err.message : err), 'errmsg');
+      });
+    }
+    function cardClearRow(idx) {
+      cardState.rows[idx] = cardBlankRow();
+      cardRenderRow(idx);
+      cardUpdateConflicts();
+      cardSave();
+    }
+    function cardImportFavs() {
+      if (!favorites.length) { alert('관심 비교 목록이 비어 있습니다. 상세표의 ♥ 버튼으로 먼저 담아 주세요.'); return; }
+      let fi = 0;
+      for (let i = 0; i < CARD_ROWS && fi < favorites.length; i++) {
+        const row = cardState.rows[i];
+        if (row.uni || row.major || row.typeName) continue;
+        cardFillFromRow(i, favorites[fi++]);
+      }
+      if (fi < favorites.length) alert('빈 행이 부족하여 관심 목록 중 ' + fi + '개만 불러왔습니다.');
+    }
+    function cardPrint() {
+      cardAcHide();
+      document.body.classList.add('print-card');
+      let st = el('cardPageStyle');
+      if (!st) { st = document.createElement('style'); st.id = 'cardPageStyle'; document.head.appendChild(st); }
+      st.textContent = '@page { size: A4 landscape; margin: 8mm; }';
+      const cleanup = () => { document.body.classList.remove('print-card'); if (st.parentNode) st.parentNode.removeChild(st); window.removeEventListener('afterprint', cleanup); };
+      window.addEventListener('afterprint', cleanup);
+      window.print();
+      setTimeout(cleanup, 1500);
+    }
+    function renderCard() {
+      const panel = el('cardPanel');
+      if (!panel) return;
+      cardLoad();
+      buildCardIndex();
+      if (!cardBuilt) {
+        panel.innerHTML = `
+          <div class="panel-head no-print">
+            <h2>수시 지원 상담카드</h2>
+            <span>대학명 → 전형명 → 학과명 순으로 입력하면 나머지 칸이 자동으로 채워집니다. 모든 칸은 직접 고쳐 쓸 수 있고, 자료에 없는 대학(과학기술원 등)은 그냥 손으로 적으면 됩니다. 입력 내용은 이 컴퓨터에 자동 저장됩니다.</span>
+          </div>
+          <div class="card-toolbar no-print">
+            <button type="button" class="primary" id="cardPrintBtn">인쇄 / PDF 저장 (A4 가로)</button>
+            <button type="button" id="cardImportBtn">관심 비교 목록 불러오기</button>
+            <button type="button" id="cardResetBtn">전체 지우기</button>
+            <button type="button" class="primary" id="cardSubmitBtn">교사에게 제출</button>
+            <span id="cardSubmitMsg" class="card-hint"></span>
+            <span class="card-hint">자동 채움 값(경쟁률·등급·반영비율 등)은 참고용이니 모집요강으로 최종 확인하세요.</span>
+          </div>
+          <div class="card-sheet"><div class="card-inner">${cardHeaderHtml()}${cardTableHtml()}<div id="anPanel"></div>${cardTeacherHtml()}</div></div>`;
+        cardBuilt = true;
+        el('cardPrintBtn').addEventListener('click', cardPrint);
+        el('cardImportBtn').addEventListener('click', cardImportFavs);
+        el('cardSubmitBtn').addEventListener('click', submitCard);
+        el('cardResetBtn').addEventListener('click', () => { if (confirm('상담카드 내용을 모두 지울까요?')) { cardState = cardDefaultState(); cardRefreshAll(); cardSave(); } });
+        panel.addEventListener('input', e => {
+          const t = e.target;
+          if (t.dataset.h !== undefined) { cardState.header[t.dataset.h] = t.value; cardSave(); return; }
+          if (t.dataset.t !== undefined) {
+            const key = t.dataset.t;
+            const v = t.isContentEditable ? t.innerText : t.value;
+            if (key === 'final') cardState.teacher.final = v;
+            else { const m = key.match(/^([dcs])(\d+)$/); if (m && cardState.teacher.rows[+m[2]]) cardState.teacher.rows[+m[2]][m[1]] = v; }
+            cardSave(); return;
+          }
+          if (t.dataset.r === undefined) return;
+          const idx = +t.dataset.r, f = t.dataset.f;
+          const row = cardState.rows[idx];
+          if (t.dataset.s !== undefined) {
+            const s = +t.dataset.s;
+            if (f === 'ratio') row.stages[s].ratio = t.value;
+            else if (f && f.startsWith('pct-')) row.stages[s].pct[f.slice(4)] = t.value;
+          } else if (t.isContentEditable) {
+            row[f] = t.innerText;
+            if (f === 'exam') cardUpdateConflicts(idx);
+          } else {
+            row[f] = t.value;
+            if (t.classList.contains('card-ac')) { cardAcFor(t); cardTryAutofill(idx, f); }
+          }
+          cardSave();
+        });
+        panel.addEventListener('focusout', e => {
+          const t = e.target;
+          if (t.classList && t.classList.contains('card-ac') && t.dataset.r !== undefined) cardTryAutofill(+t.dataset.r);
+          if (t.dataset && t.dataset.f === 'exam') cardUpdateConflicts();
+        });
+        panel.addEventListener('focusin', e => {
+          const t = e.target;
+          if (t.classList && t.classList.contains('card-ac')) cardAcFor(t);
+        });
+        panel.addEventListener('click', e => {
+          const oxEl = e.target.closest('.card-ox');
+          if (oxEl) {
+            const k = oxEl.dataset.ox;
+            const cur = cardState.header[k] || '';
+            const nxt = cur === '' ? 'O' : (cur === 'O' ? 'X' : '');
+            cardState.header[k] = nxt;
+            oxEl.textContent = nxt;
+            cardSave();
+            return;
+          }
+          const strat = e.target.closest('.card-strat');
+          if (strat) {
+            const idx = +strat.dataset.r;
+            cardState.rows[idx].strategy = cardState.rows[idx].strategy === strat.dataset.strat ? '' : strat.dataset.strat;
+            cardRenderRow(idx);
+            cardSave();
+            return;
+          }
+          const clr = e.target.closest('.card-clear-row');
+          if (clr && confirm((+clr.dataset.clear + 1) + '번 행을 지울까요?')) cardClearRow(+clr.dataset.clear);
+        });
+        panel.addEventListener('keydown', e => {
+          if (e.key === 'Escape') cardAcHide();
+          if (e.target.classList && e.target.classList.contains('card-ac')) {
+            const box = el('cardAcBox');
+            const open = box && box.style.display === 'block';
+            if (!open) return;
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+              // ↑↓ 키로 목록 탐색 (선택 항목이 보이도록 자동 스크롤)
+              e.preventDefault();
+              const items = Array.from(box.querySelectorAll('.card-ac-item'));
+              if (!items.length) return;
+              let i = items.findIndex(it => it.classList.contains('active'));
+              i = e.key === 'ArrowDown' ? (i < items.length - 1 ? i + 1 : 0) : (i <= 0 ? items.length - 1 : i - 1);
+              items.forEach(it => it.classList.remove('active'));
+              items[i].classList.add('active');
+              items[i].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+              const pick = box.querySelector('.card-ac-item.active') || box.querySelector('.card-ac-item');
+              if (pick) { e.preventDefault(); pick.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true })); }
+            }
+          }
+        });
+        cardRefreshAll();
+      }
+    }
+    function cardRefreshAll() {
+      const h = cardState.header;
+      el('cardPanel').querySelectorAll('input[data-h]').forEach(i2 => { i2.value = h[i2.dataset.h] || ''; });
+      el('cardPanel').querySelectorAll('[data-ox]').forEach(s => { s.textContent = h[s.dataset.ox] || ''; });
+      const tch = cardState.teacher || { rows: [], final: '' };
+      el('cardPanel').querySelectorAll('[data-t]').forEach(n => {
+        const key = n.dataset.t;
+        let v = '';
+        if (key === 'final') v = tch.final || '';
+        else { const m = key.match(/^([dcs])(\d+)$/); if (m && tch.rows[+m[2]]) v = tch.rows[+m[2]][m[1]] || ''; }
+        if (n.isContentEditable) n.innerText = v; else n.value = v;
+      });
+      for (let i = 0; i < CARD_ROWS; i++) cardRenderRow(i);
+      renderAnalysis();
+    }
+    // ==================== /상담카드 탭 ====================
+
+  // 3단계: 대학 목록·고사일을 먼저 받은 뒤 카드를 그린다
+  setStatus('대학 목록과 고사일 자료를 불러오는 중…');
+  call('getBoot').then(b => {
+    BOOT = b || { unis: [] };
+    CARD_SCHED = typeof BOOT.sched === 'string' ? JSON.parse(BOOT.sched) : (BOOT.sched || []);
+    setStatus('');
+  }).catch(err => {
+    setStatus((err && err.message ? err.message : err) + ' (자동 채움 없이 직접 입력만 가능)', true);
+  }).then(() => {
+    renderCard();
+    const ib = el('cardImportBtn'); if (ib) ib.style.display = 'none';
+  });
+})();
+</script>
+</body>
+</html>
