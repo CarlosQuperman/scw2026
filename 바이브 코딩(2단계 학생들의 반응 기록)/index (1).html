@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이동식 크레인 — 지문으로 배우는 인양의 역학</title>
+<style>
+:root{
+  --steel-900:#17202B;
+  --steel-800:#1F2A37;
+  --steel-700:#2A3947;
+  --steel-500:#4A5C6E;
+  --steel-300:#8C9BA8;
+  --steel-150:#C7D0D8;
+  --paper:#EDEFF1;
+  --paper-2:#F7F8F9;
+  --hazard:#F5B700;
+  --hazard-dim:#B98B06;
+  --alarm:#D8341F;
+  --safe:#2E9E6B;
+  --caution:#E08A0B;
+  --rule:rgba(140,155,168,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--steel-900);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;
+  font-size:16px;line-height:1.7;
+  -webkit-text-size-adjust:100%;
+}
+body.big{font-size:19px}
+h1,h2,h3{line-height:1.25;letter-spacing:-.02em;margin:0}
+h2{font-size:1.5rem;font-weight:800}
+h3{font-size:1.05rem;font-weight:700}
+p{margin:.6em 0}
+a{color:var(--steel-700)}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* ---------- masthead ---------- */
+.masthead{
+  background:var(--steel-900);color:var(--paper);
+  padding:14px 20px;display:flex;align-items:center;gap:18px;
+  position:sticky;top:0;z-index:40;
+  border-bottom:3px solid var(--hazard);
+}
+.masthead svg{flex:0 0 auto}
+.mast-txt h1{font-size:1.15rem;font-weight:800;letter-spacing:-.03em}
+.mast-txt p{margin:2px 0 0;font-size:.78rem;color:var(--steel-300);line-height:1.4}
+.mast-tools{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tbtn{
+  background:transparent;border:1px solid var(--steel-500);color:var(--steel-150);
+  border-radius:3px;padding:6px 10px;font-size:.78rem;cursor:pointer;font-family:inherit;white-space:nowrap;
+}
+.tbtn:hover{border-color:var(--hazard);color:var(--hazard)}
+.tbtn:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
+
+/* ---------- shell + rail ---------- */
+.shell{display:grid;grid-template-columns:216px minmax(0,1fr);gap:0;align-items:start}
+.rail{
+  position:sticky;top:64px;align-self:start;
+  background:var(--steel-800);min-height:calc(100vh - 64px);
+  padding:14px 0;display:flex;flex-direction:column;
+}
+.rail button{
+  display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;
+  background:none;border:0;border-left:3px solid transparent;
+  color:var(--steel-150);padding:11px 16px;font-size:.88rem;cursor:pointer;
+  font-family:inherit;line-height:1.35;
+}
+.rail button .ix{font-size:.7rem;color:var(--steel-500);font-variant-numeric:tabular-nums;min-width:14px}
+.rail button:hover{background:var(--steel-700);color:#fff}
+.rail button[aria-selected="true"]{
+  background:var(--steel-900);color:var(--hazard);border-left-color:var(--hazard);font-weight:700;
+}
+.rail button[aria-selected="true"] .ix{color:var(--hazard-dim)}
+.rail button:focus-visible{outline:2px solid var(--hazard);outline-offset:-2px}
+
+main{padding:26px 30px 56px;max-width:1180px}
+.panel{display:none}
+.panel.on{display:block}
+.lede{max-width:66ch;color:var(--steel-700);font-size:.98rem}
+.srcline{font-size:.78rem;color:var(--steel-500);margin-top:2px}
+
+.hd{border-bottom:2px solid var(--steel-900);padding-bottom:10px;margin-bottom:20px}
+.hd .kicker{font-size:.76rem;color:var(--steel-500);font-variant-numeric:tabular-nums}
+
+/* ---------- generic blocks ---------- */
+.quote{
+  border-left:4px solid var(--hazard);background:#fff;
+  padding:12px 16px;margin:16px 0;font-size:.92rem;color:var(--steel-700);
+}
+.quote b{color:var(--steel-900)}
+.note{font-size:.84rem;color:var(--steel-500)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.card{background:#fff;border:1px solid var(--rule);padding:16px 18px}
+.card h3{margin-bottom:6px}
+.card p{font-size:.9rem;margin:.35em 0;color:var(--steel-700)}
+
+table{border-collapse:collapse;width:100%;font-size:.88rem;background:#fff;margin:14px 0}
+th,td{border:1px solid var(--rule);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--steel-800);color:var(--paper);font-weight:600}
+td.y{background:#FFF9E3}
+tbody tr:nth-child(even) td{background:var(--paper-2)}
+tbody tr:nth-child(even) td.y{background:#FDF3D4}
+
+/* ---------- lab layout ---------- */
+.lab{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(250px,1fr);gap:20px;align-items:start}
+.stage{background:#fff;border:1px solid var(--rule);position:relative;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.deck{display:flex;flex-direction:column;gap:14px}
+.ctl{background:#fff;border:1px solid var(--rule);padding:14px 16px}
+.ctl h3{font-size:.9rem;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--rule)}
+.row{display:flex;justify-content:space-between;align-items:baseline;font-size:.84rem;margin-top:12px}
+.row:first-of-type{margin-top:0}
+.row .v{font-weight:700;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;margin:4px 0 0;accent-color:var(--hazard);height:22px}
+input[type=range]:focus-visible{outline:2px solid var(--hazard);outline-offset:3px}
+
+.sw{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:.85rem;cursor:pointer}
+.sw input{position:absolute;opacity:0;width:0;height:0}
+.sw .box{
+  width:36px;height:20px;border-radius:10px;background:var(--steel-150);
+  position:relative;transition:background .18s;flex:0 0 auto;
+}
+.sw .box::after{
+  content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;
+  background:#fff;transition:transform .18s;box-shadow:0 1px 2px rgba(0,0,0,.3);
+}
+.sw input:checked + .box{background:var(--safe)}
+.sw input:checked + .box::after{transform:translateX(16px)}
+.sw input:focus-visible + .box{outline:2px solid var(--hazard);outline-offset:2px}
+.sw.off{opacity:.42;cursor:not-allowed}
+
+/* ---------- gauges ---------- */
+.gauges{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.g{background:#fff;padding:11px 13px}
+.g .lbl{font-size:.74rem;color:var(--steel-500);line-height:1.3}
+.g .val{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.03em;line-height:1.2}
+.g .unit{font-size:.72rem;font-weight:600;color:var(--steel-500);margin-left:3px}
+.g.wide{grid-column:1/-1}
+.verdict{padding:12px 14px;font-weight:700;font-size:.95rem;border:1px solid transparent}
+.verdict.ok{background:#E7F5EE;color:#1C6B47;border-color:#B8E0CC}
+.verdict.warn{background:#FDF2DC;color:#8A5502;border-color:#F2D79B}
+.verdict.bad{background:#FBE7E4;color:#9A2213;border-color:#F0BDB5}
+.verdict small{display:block;font-weight:400;font-size:.8rem;margin-top:3px;line-height:1.5}
+
+/* ---------- hotspot ---------- */
+.hs{cursor:pointer}
+.hs circle.hit{fill:var(--hazard);stroke:#fff;stroke-width:2;transition:r .15s}
+.hs:hover circle.hit,.hs.sel circle.hit{r:11}
+.hs.sel circle.hit{fill:var(--alarm)}
+.hs text{font-size:11px;font-weight:700;fill:var(--steel-900);pointer-events:none}
+.partlist{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{
+  border:1px solid var(--steel-300);background:#fff;border-radius:2px;
+  padding:5px 10px;font-size:.8rem;cursor:pointer;font-family:inherit;color:var(--steel-700);
+}
+.chip:hover{border-color:var(--hazard);background:#FFFBEE}
+.chip[aria-pressed="true"]{background:var(--steel-900);color:var(--hazard);border-color:var(--steel-900)}
+.chip:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
+dl.spec{margin:0;font-size:.88rem}
+dl.spec dt{font-weight:700;color:var(--steel-500);font-size:.76rem;margin-top:11px}
+dl.spec dt:first-child{margin-top:0}
+dl.spec dd{margin:2px 0 0}
+
+/* ---------- concept map ---------- */
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin:18px 0}
+.step{background:#fff;border:1px solid var(--rule);border-top:4px solid var(--steel-700);padding:14px}
+.step:nth-child(3){border-top-color:var(--hazard)}
+.step .pno{font-size:.74rem;color:var(--steel-500);font-variant-numeric:tabular-nums}
+.step h3{font-size:.98rem;margin:3px 0 8px}
+.step p{font-size:.85rem;margin:0 0 10px;color:var(--steel-700)}
+
+.mis{background:#fff;border:1px solid var(--rule);border-left:4px solid var(--alarm);padding:14px 16px;margin-top:12px}
+.mis .x{color:var(--alarm);font-weight:700;font-size:.88rem}
+.mis .o{color:var(--safe);font-weight:700;font-size:.88rem}
+.mis p{font-size:.88rem;margin:.3em 0}
+
+/* ---------- accordion ---------- */
+.acc{background:#fff;border:1px solid var(--rule);margin-top:-1px}
+.acc summary{
+  padding:12px 16px;cursor:pointer;font-weight:700;font-size:.94rem;
+  display:flex;align-items:center;gap:10px;list-style:none;
+}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary::before{content:"+";color:var(--hazard);font-weight:800;width:12px}
+.acc[open] summary::before{content:"−"}
+.acc summary:hover{background:var(--paper-2)}
+.acc .body{padding:0 16px 16px 38px;font-size:.9rem;color:var(--steel-700)}
+.ask{background:var(--steel-900);color:var(--paper);padding:10px 13px;margin-top:10px;font-size:.85rem}
+.ask b{color:var(--hazard)}
+.ask .ans{display:none;margin-top:6px;color:var(--steel-150)}
+.ask.open .ans{display:block}
+.ask button{
+  background:none;border:1px solid var(--steel-500);color:var(--hazard);
+  font-size:.74rem;padding:3px 8px;cursor:pointer;margin-left:8px;font-family:inherit;
+}
+
+/* ---------- quiz ---------- */
+.rail .quizLaunch{
+  margin-top:auto;background:var(--hazard);color:var(--steel-900);border:0;
+  padding:13px 16px;font-weight:800;font-size:.88rem;cursor:pointer;font-family:inherit;
+  text-align:center;flex:0 0 auto;
+}
+.rail .quizLaunch:hover{background:#FFD34D}
+.rail .quizLaunch:focus-visible{outline:2px solid #fff;outline-offset:-4px}
+#quizPanel{
+  position:fixed;right:0;top:0;bottom:0;width:min(440px,100%);z-index:60;
+  background:var(--paper-2);border-left:3px solid var(--hazard);
+  overflow-y:auto;padding:20px 22px 40px;transform:translateX(102%);
+  transition:transform .25s ease;box-shadow:-6px 0 24px rgba(23,32,43,.16);
+}
+#quizPanel.on{transform:translateX(0)}
+.q{background:#fff;border:1px solid var(--rule);padding:13px 15px;margin-bottom:12px}
+.q p.stem{font-weight:700;font-size:.9rem;margin:0 0 9px}
+.q label{display:block;font-size:.86rem;padding:5px 7px;cursor:pointer;border:1px solid transparent}
+.q label:hover{background:var(--paper-2)}
+.q input{margin-right:7px;accent-color:var(--hazard)}
+.q label.right{background:#E7F5EE;border-color:#B8E0CC}
+.q label.wrong{background:#FBE7E4;border-color:#F0BDB5}
+.q .why{display:none;font-size:.82rem;color:var(--steel-700);border-top:1px dashed var(--rule);margin-top:9px;padding-top:8px}
+.q.done .why{display:block}
+.score{background:var(--steel-900);color:var(--paper);padding:14px 16px;font-weight:700;margin-bottom:14px}
+.score .num{color:var(--hazard);font-size:1.5rem}
+/* ---------- 제출(2단계) ---------- */
+.stu{background:#fff;border:1px solid var(--rule);padding:13px 15px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1.4fr;gap:10px}
+.stu label{font-size:.8rem;font-weight:700;color:var(--steel-700);display:flex;flex-direction:column;gap:4px}
+.stu input{font:inherit;font-size:.95rem;padding:8px 10px;border:1px solid var(--steel-300);border-radius:3px;background:#fff;color:var(--steel-900)}
+.stu input:focus{outline:2px solid var(--hazard);border-color:var(--hazard)}
+.stu input.bad{border-color:var(--alarm);background:#FBE7E4}
+.q.missing{border-color:var(--alarm);box-shadow:0 0 0 1px var(--alarm)}
+.play[disabled]{opacity:.5;cursor:not-allowed}
+.msg{display:none;font-size:.84rem;margin-top:12px;padding:10px 12px;line-height:1.55}
+.msg.on{display:block}
+.msg.ok{background:#E7F5EE;color:#1E6B48;border:1px solid #B8E0CC}
+.msg.err{background:#FBE7E4;color:#9E2414;border:1px solid #F0BDB5}
+.msg.wait{background:var(--paper);color:var(--steel-700);border:1px solid var(--rule)}
+
+/* ---------- misc ---------- */
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.78rem;color:var(--steel-700);margin-top:10px}
+.legend i{display:inline-block;width:13px;height:13px;margin-right:5px;vertical-align:-2px;border:1px solid rgba(0,0,0,.2)}
+.overlay{
+  position:absolute;inset:0;display:none;place-items:center;
+  background:rgba(216,52,31,.9);color:#fff;text-align:center;padding:24px;
+}
+.overlay.on{display:grid}
+.overlay h3{font-size:1.25rem;margin-bottom:6px}
+.overlay p{font-size:.88rem;max-width:34ch;margin:0 auto}
+.overlay button{
+  margin-top:14px;background:#fff;color:var(--alarm);border:0;
+  padding:9px 18px;font-weight:800;cursor:pointer;font-family:inherit;
+}
+.play{
+  background:var(--steel-900);color:var(--hazard);border:0;
+  padding:9px 16px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.play:hover{background:var(--steel-700)}
+.play:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .rail{
+    position:sticky;top:60px;min-height:0;flex-direction:row;overflow-x:auto;
+    padding:0;border-bottom:1px solid var(--steel-700);
+  }
+  .rail button{width:auto;white-space:nowrap;border-left:0;border-bottom:3px solid transparent;padding:10px 13px}
+  .rail button[aria-selected="true"]{border-left:0;border-bottom-color:var(--hazard)}
+  main{padding:18px 15px 100px}
+  .lab{grid-template-columns:1fr}
+  .masthead{padding:10px 14px;gap:12px}
+  .mast-txt p{display:none}
+  .mast-txt h1{font-size:.96rem}
+  .masthead svg{width:40px;height:32px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+@media print{
+  .rail,#quizPanel,.mast-tools{display:none}
+  .panel{display:block !important;page-break-after:always}
+  .shell{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <svg id="mastCrane" width="54" height="42" viewBox="0 0 54 42" aria-hidden="true">
+    <rect x="4" y="30" width="26" height="8" rx="1" fill="#4A5C6E"/>
+    <circle cx="10" cy="39" r="3" fill="#8C9BA8"/><circle cx="24" cy="39" r="3" fill="#8C9BA8"/>
+    <g id="mastBoom" transform="rotate(0 16 30)">
+      <rect x="14" y="4" width="5" height="27" rx="1.5" fill="#F5B700"/>
+    </g>
+    <line x1="2" y1="38" x2="52" y2="38" stroke="#2A3947" stroke-width="2"/>
+  </svg>
+  <div class="mast-txt">
+    <h1>이동식 크레인 — 지문으로 배우는 인양의 역학</h1>
+    <p>수능특강 기술 지문 &lt;이동식 크레인&gt; 연계 학습 자료 · 붐과 모멘트를 직접 움직여 보는 실습판</p>
+  </div>
+  <div class="mast-tools">
+    <button class="tbtn" id="bigBtn" aria-pressed="false">큰 글씨</button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" role="tablist" aria-label="학습 단계">
+    <button role="tab" data-p="p1" aria-selected="true"><span class="ix num">1</span><span>지문 구조와 오개념</span></button>
+    <button role="tab" data-p="p2" aria-selected="false"><span class="ix num">2</span><span>크레인 해부하기</span></button>
+    <button role="tab" data-p="p3" aria-selected="false"><span class="ix num">3</span><span>유압식 붐과 격자형 붐</span></button>
+    <button role="tab" data-p="p4" aria-selected="false"><span class="ix num">4</span><span>기복과 선회</span></button>
+    <button role="tab" data-p="p5" aria-selected="false"><span class="ix num">5</span><span>보조 붐과 작업 범위</span></button>
+    <button role="tab" data-p="p6" aria-selected="false"><span class="ix num">6</span><span>모멘트 실험실</span></button>
+    <button role="tab" data-p="p7" aria-selected="false"><span class="ix num">7</span><span>크롤러와 험지형</span></button>
+    <button role="tab" data-p="p8" aria-selected="false"><span class="ix num">8</span><span>한국의 크레인 산업</span></button>
+    <button type="button" class="quizLaunch" id="quizBtn">형성평가 풀기</button>
+  </nav>
+
+  <main>
+
+  <!-- ============ 1 ============ -->
+  <section class="panel on" id="p1" role="tabpanel">
+    <div class="hd">
+      <div class="kicker num">1 / 8</div>
+      <h2>지문은 네 걸음으로 걸어간다</h2>
+    </div>
+    <p class="lede">지문은 크레인이 <b>무엇인가</b>에서 출발해 <b>어떻게 움직이는가</b>를 거쳐, <b>왜 넘어지지 않는가</b>로 좁혀지고, 마지막에 <b>넘어지지 않게 돕는 장치</b>로 닫힌다. 각 문단의 용어를 누르면 그 개념을 직접 만져 볼 수 있는 화면으로 넘어간다.</p>
+
+    <div class="flow">
+      <div class="step">
+        <div class="pno num">1문단</div>
+        <h3>크레인이란 무엇인가</h3>
+        <p>타이어나 무한궤도 위에서 동력으로 화물을 들어 올리고 수평으로 옮기는 장비. 사람 힘으로 불가능한 자재를 다뤄 건설을 빠르게 만든다.</p>
+        <div class="partlist">
+          <button class="chip" data-go="p7">타이어·무한궤도</button>
+        </div>
+      </div>
+      <div class="step">
+        <div class="pno num">2문단</div>
+        <h3>어떻게 움직이는가</h3>
+        <p>붐이 도달 범위와 높이를 정하고, 후크와 와이어로프가 물체를 든다. 붐은 위아래로 기복하고 좌우로 선회한다.</p>
+        <div class="partlist">
+          <button class="chip" data-go="p2">붐·후크·와이어로프</button>
+          <button class="chip" data-go="p3">유압식 / 격자형</button>
+          <button class="chip" data-go="p4">기복 · 선회</button>
+          <button class="chip" data-go="p5">보조 붐</button>
+        </div>
+      </div>
+      <div class="step">
+        <div class="pno num">3문단</div>
+        <h3>왜 넘어지지 않는가</h3>
+        <p>양중 능력은 지렛대의 원리로 결정된다. 전도 축을 기준으로 안정 모멘트가 양중 모멘트보다 커야 크레인이 버틴다.</p>
+        <div class="partlist">
+          <button class="chip" data-go="p6">안정 모멘트 · 양중 모멘트</button>
+          <button class="chip" data-go="p6">양중 능력 표</button>
+        </div>
+      </div>
+      <div class="step">
+        <div class="pno num">4문단</div>
+        <h3>무엇이 돕는가</h3>
+        <p>받침목은 지면에 가해지는 압력을 분산해 침하를 막고, 평형추는 하중 반대쪽에서 안정 모멘트를 키운다.</p>
+        <div class="partlist">
+          <button class="chip" data-go="p6">받침목 · 평형추</button>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:28px">시험에서 갈리는 지점 셋</h3>
+    <p class="note">세 문항의 정답이 모두 이 세 가지 착각에서 나왔다. 아래 화면들은 이 착각을 깨뜨리도록 설계했다.</p>
+
+    <div class="mis">
+      <p class="x">✕ 붐이 위아래로 움직이는 게 선회다</p>
+      <p class="o">○ 위아래는 기복, 좌우는 선회다</p>
+      <p>회전축이 눕느냐 서느냐로 구분한다. 기복은 지면과 나란한 수평축을 중심으로, 선회는 지면에 수직인 축을 중심으로 돈다. <button class="chip" data-go="p4">두 축을 직접 돌려 보기</button></p>
+    </div>
+    <div class="mis">
+      <p class="x">✕ 격자형 붐도 유압 실린더로 길이를 조절한다</p>
+      <p class="o">○ 길이를 늘이고 줄이는 건 유압식 붐뿐이다</p>
+      <p>격자형 붐은 트러스 조각을 이어 붙여 길이를 정한다. 한 번 조립하면 작업 중에는 길이가 고정된다. <button class="chip" data-go="p3">두 붐이 길어지는 방식 비교</button></p>
+    </div>
+    <div class="mis">
+      <p class="x">✕ 지면에 가하는 압력을 한곳에 모으면 안정적이다</p>
+      <p class="o">○ 압력은 넓게 분산해야 가라앉지 않는다</p>
+      <p>받침목은 접지 면적을 키워 단위 면적당 압력을 낮춘다. 크레인이 한쪽으로 가라앉으면 수평을 잃고 전도 위험이 커진다. <button class="chip" data-go="p6">받침목을 빼고 접지압 보기</button></p>
+    </div>
+  </section>
+
+  <!-- ============ 2 ============ -->
+  <section class="panel" id="p2" role="tabpanel">
+    <div class="hd">
+      <div class="kicker num">2 / 8</div>
+      <h2>크레인 해부하기</h2>
+    </div>
+    <p class="lede">그림의 노란 점을 누르면 그 부품이 무슨 일을 하는지, 지문의 어느 문장에서 나온 말인지, 없으면 무슨 일이 생기는지 나온다.</p>
+
+    <div class="lab">
+      <div class="stage">
+        <svg id="anatomy" viewBox="0 0 760 470" role="img" aria-label="이동식 크레인 측면 구조도"></svg>
+      </div>
+      <div class="deck">
+        <div class="ctl">
+          <h3>부품 목록</h3>
+          <div class="partlist" id="partChips"></div>
+        </div>
+        <div class="ctl" id="partInfo">
+          <h3 id="partName">부품을 고르면 설명이 나온다</h3>
+          <dl class="spec" id="partBody">
+            <dt>사용법</dt>
+            <dd>그림 위의 노란 점이나 위 목록의 이름을 누르면 된다.</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3 ============ -->
+  <section class="panel" id="p3" role="tabpanel">
+    <div class="hd">
+      <div class="kicker num">3 / 8</div>
+      <h2>유압식 붐과 격자형 붐</h2>
+    </div>
+    <p class="lede">두 붐은 길어지는 방식부터 다르다. 재생 버튼을 눌러 한쪽은 실린더가 밀려 나오고, 다른 쪽은 조각이 쌓여 올라가는 과정을 보라.</p>
+
+    <div class="grid2">
+      <div class="card" style="padding:0">
+        <div style="padding:14px 18px 0"><h3>유압식 붐 — 밀어서 늘인다</h3></div>
+        <svg id="hydBoom" viewBox="0 0 360 240" role="img" aria-label="유압식 붐 신축 애니메이션"></svg>
+        <div style="padding:0 18px 16px">
+          <p>안쪽 단이 바깥 단 속에 겹쳐 들어가 있다가 유압 실린더가 밀어내면서 뻗어 나온다. 작업 중에도 길이를 바꿀 수 있다.</p>
+          <button class="play" data-anim="hyd">신축 재생</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0">
+        <div style="padding:14px 18px 0"><h3>격자형 붐 — 이어 붙여 늘인다</h3></div>
+        <svg id="latBoom" viewBox="0 0 360 240" role="img" aria-label="격자형 붐 조립 애니메이션"></svg>
+        <div style="padding:0 18px 16px">
+          <p>트러스 조각을 볼트로 이어 길이를 만든다. 작업 전에 조립을 끝내야 하고, 작업 중에는 길이가 고정된다.</p>
+          <button class="play" data-anim="lat">조립 재생</button>
+        </div>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th style="width:18%">비교 항목</th><th>유압식 붐</th><th>격자형 붐</th></tr></thead>
+      <tbody>
+        <tr><td>길이 조절</td><td class="y"><b>작업 중 신축 가능</b> — 유압 실린더로 늘이고 줄인다</td><td class="y"><b>작업 중 불가</b> — 세그먼트를 조립·해체해야 한다</td></tr>
+        <tr><td>붐 자체 무게</td><td>실린더와 두꺼운 강판 때문에 무겁다</td><td>트러스 구조라 같은 길이에서 훨씬 가볍다</td></tr>
+        <tr><td>준비 시간</td><td>현장 도착 후 바로 작업 가능</td><td>보조 크레인을 불러 몇 시간에서 며칠 조립</td></tr>
+        <tr><td>인양 능력</td><td>붐 자중이 커서 같은 급에서 상대적으로 낮다</td><td>자중이 가벼운 만큼 더 무거운 물체를 든다</td></tr>
+        <tr><td>도달 길이</td><td>단 수에 한계가 있어 길이 확장이 제한적</td><td>세그먼트를 계속 이어 매우 길게 만들 수 있다</td></tr>
+        <tr><td>어울리는 현장</td><td>도심 공사, 짧고 잦은 작업, 이동이 많은 현장</td><td>대형 플랜트, 교량, 풍력 단지처럼 오래 머무는 현장</td></tr>
+        <tr><td>지문 속 짝</td><td>험지형 크레인에 주로 장착</td><td>크롤러 크레인에 주로 장착</td></tr>
+      </tbody>
+    </table>
+
+    <div class="quote">시험 포인트 — <b>유압 실린더로 길이를 조절할 수 있는 붐은 유압식 붐뿐이다.</b> 격자형 붐이 달린 크롤러 크레인을 두고 "유압 실린더로 길이 조절이 가능하다"고 하면 틀린 진술이 된다.</div>
+  </section>
+
+  <!-- ============ 4 ============ -->
+  <section class="panel" id="p4" role="tabpanel">
+    <div class="hd">
+      <div class="kicker num">4 / 8</div>
+      <h2>기복과 선회</h2>
+    </div>
+    <p class="lede">한 화면으로는 두 동작이 구분되지 않는다. 왼쪽은 옆에서 본 모습, 오른쪽은 위에서 내려다본 모습이다. 어느 쪽 손잡이를 움직이든 두 그림이 함께 반응한다.</p>
+
+    <div class="lab">
+      <div class="stage">
+        <svg id="dualView" viewBox="0 0 760 400" role="img" aria-label="기복과 선회 비교 애니메이션"></svg>
+      </div>
+      <div class="deck">
+        <div class="ctl">
+          <h3>기복 — 수평축을 중심으로 위아래</h3>
+          <div class="row"><span>붐 각도</span><span class="v"><span id="luffV" class="num">55</span>°</span></div>
+          <input type="range" id="luff" min="20" max="80" step="1" value="55" aria-label="붐 각도">
+          <p class="note" style="margin-top:8px">회전축이 지면과 나란히 <b>누워</b> 있다. 붐 끝이 그리는 자취는 세로 방향의 원호다.</p>
+        </div>
+        <div class="ctl">
+          <h3>선회 — 수직축을 중심으로 좌우</h3>
+          <div class="row"><span>선회각</span><span class="v"><span id="slewV" class="num">0</span>°</span></div>
+          <input type="range" id="slew" min="-180" max="180" step="1" value="0" aria-label="선회각">
+          <p class="note" style="margin-top:8px">회전축이 지면에 수직으로 <b>서</b> 있다. 위에서 보면 붐 끝이 원을 그린다.</p>
+        </div>
+        <div class="ctl">
+          <h3>유압식이라면 하나 더</h3>
+          <div class="row"><span>붐 길이</span><span class="v"><span id="telV" class="num">20</span> m</span></div>
+          <input type="range" id="tel" min="10" max="30" step="1" value="20" aria-label="붐 길이">
+          <p class="note" style="margin-top:8px">신축은 기복도 선회도 아니다. 붐 각도를 그대로 둔 채 도달 거리만 바뀐다.</p>
+          <div class="btnrow"><button class="play" id="demoPlay">기복 → 선회 → 신축 시연</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5 ============ -->
+  <section class="panel" id="p5" role="tabpanel">
+    <div class="hd">
+      <div class="kicker num">5 / 8</div>
+      <h2>보조 붐이 붙으면 범위가 얼마나 넓어지나</h2>
+    </div>
+    <p class="lede">붐 끝이 닿을 수 있는 모든 지점을 이어 칠한 영역이 작업 범위다. 보조 붐을 켜면 붐과 보조 붐이 따로 기복하면서 바깥쪽으로 영역이 자란다. "훨씬 넓다"를 숫자로 확인해 보라.</p>
+
+    <div class="lab">
+      <div class="stage">
+        <svg id="envelope" viewBox="0 0 760 460" role="img" aria-label="붐 작업 범위 비교"></svg>
+      </div>
+      <div class="deck">
+        <div class="ctl">
+          <h3>구성</h3>
+          <label class="sw"><input type="checkbox" id="jibOn"><span class="box"></span><span>보조 붐 부착</span></label>
+          <div class="row"><span>주 붐 길이</span><span class="v"><span id="ebL" class="num">24</span> m</span></div>
+          <input type="range" id="ebLen" min="16" max="36" step="1" value="24" aria-label="주 붐 길이">
+          <div class="row"><span>보조 붐 길이</span><span class="v"><span id="ejL" class="num">12</span> m</span></div>
+          <input type="range" id="ejLen" min="6" max="20" step="1" value="12" aria-label="보조 붐 길이">
+          <p class="note" style="margin-top:8px">보조 붐은 주 붐에 대해 0°에서 60°까지 꺾을 수 있다고 두었다.</p>
+        </div>
+        <div class="gauges">
+          <div class="g"><div class="lbl">최대 도달 높이</div><div class="val"><span id="mH" class="num">0</span><span class="unit">m</span></div></div>
+          <div class="g"><div class="lbl">최대 작업 반경</div><div class="val"><span id="mR" class="num">0</span><span class="unit">m</span></div></div>
+          <div class="g wide"><div class="lbl">작업 범위 넓이 (보조 붐 없을 때 대비)</div><div class="val"><span id="mA" class="num">100</span><span class="unit">%</span></div></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:rgba(74,92,110,.35)"></i>주 붐만의 범위</span>
+          <span><i style="background:rgba(245,183,0,.45)"></i>보조 붐으로 늘어난 범위</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote">지문 문장 — 일부 크레인은 <b>붐과 보조 붐을 따로 기복</b>할 수 있어 움직이는 범위가 훨씬 넓다. 보기의 크롤러 크레인이 바로 이 경우다.</div>
+  </section>
+
+  <!-- ============ 6 ============ -->
+  <section class="panel" id="p6" role="tabpanel">
+    <div class="hd">
+      <div class="kicker num">6 / 8</div>
+      <h2>모멘트 실험실</h2>
+    </div>
+    <p class="lede">전도 축을 받침점으로 놓은 지렛대다. 왼쪽에는 크레인 자신의 무게가, 오른쪽에는 매달린 물체의 무게가 걸린다. 손잡이를 움직여 어느 쪽이 이기는지 보라.</p>
+
+    <div class="lab">
+      <div class="stage">
+        <svg id="momentView" viewBox="0 0 760 560" role="img" aria-label="안정 모멘트와 양중 모멘트 비교"></svg>
+        <div class="overlay" id="tipOver">
+          <div>
+            <h3>전도 발생</h3>
+            <p>양중 모멘트가 안정 모멘트를 넘어섰다. 전도가 시작되면 되돌릴 수 없다. 조건을 바꿔 다시 시도하라.</p>
+            <button id="tipReset">초기 상태로</button>
+          </div>
+        </div>
+      </div>
+      <div class="deck">
+        <div class="verdict ok" id="verdict">안정 — 안정 모멘트가 양중 모멘트보다 크다<small id="verdictSub"></small></div>
+        <div class="gauges">
+          <div class="g"><div class="lbl">안정 모멘트 Ms<br>크레인 중량 × 거리 A</div><div class="val"><span id="gMs" class="num">40</span><span class="unit">t·m</span></div></div>
+          <div class="g"><div class="lbl">양중 모멘트 Ml<br>물체 무게 × 거리 B</div><div class="val"><span id="gMl" class="num">32</span><span class="unit">t·m</span></div></div>
+          <div class="g"><div class="lbl">거리 A</div><div class="val"><span id="gA" class="num">2.0</span><span class="unit">m</span></div></div>
+          <div class="g"><div class="lbl">거리 B (작업 반경)</div><div class="val"><span id="gB" class="num">8.0</span><span class="unit">m</span></div></div>
+          <div class="g"><div class="lbl">안전율 Ms ÷ Ml</div><div class="val"><span id="gSf" class="num">1.25</span></div></div>
+          <div class="g"><div class="lbl">표에 실릴 양중 능력<br>임계 하중의 80%</div><div class="val"><span id="gCap" class="num">4.0</span><span class="unit">t</span></div></div>
+          <div class="g wide"><div class="lbl">지면에 가해지는 압력 (허용 150 kPa)</div><div class="val"><span id="gPr" class="num">0</span><span class="unit">kPa</span></div></div>
+        </div>
+        <div class="ctl">
+          <h3>인양 조건</h3>
+          <div class="row"><span>물체 무게</span><span class="v"><span id="wV" class="num">4</span> t</span></div>
+          <input type="range" id="wLoad" min="1" max="12" step="1" value="4" aria-label="물체 무게">
+          <div class="row"><span>붐 길이</span><span class="v"><span id="lV" class="num">20</span> m</span></div>
+          <input type="range" id="mLen" min="10" max="30" step="2" value="20" aria-label="붐 길이">
+          <div class="row"><span>붐 각도</span><span class="v"><span id="aV" class="num">60</span>°</span></div>
+          <input type="range" id="mAng" min="30" max="75" step="5" value="60" aria-label="붐 각도">
+          <div class="row"><span>풍속</span><span class="v"><span id="windV" class="num">0</span> m/s</span></div>
+          <input type="range" id="wind" min="0" max="18" step="1" value="0" aria-label="풍속">
+        </div>
+        <div class="ctl">
+          <h3>전도를 막는 장치</h3>
+          <label class="sw"><input type="checkbox" id="outrig" checked><span class="box"></span><span>아웃트리거 — 전도 축을 바깥으로 밀어 A를 늘린다</span></label>
+          <label class="sw" id="matWrap"><input type="checkbox" id="mat" checked><span class="box"></span><span>받침목 — 접지 면적을 넓혀 압력을 분산한다</span></label>
+          <label class="sw"><input type="checkbox" id="cwt"><span class="box"></span><span>평형추 12t — 반대쪽 중량으로 Ms를 키운다</span></label>
+          <p class="note" style="margin-top:8px">붐 각도를 60°에 두면 cos 60° = 0.5라서 계산이 딱 떨어진다. 수업 중 암산으로 확인하기 좋은 지점이다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:22px">
+      <div class="card">
+        <h3>설정한 수치</h3>
+        <p>크레인 중량 20 t · 평형추 12 t · 붐 피벗은 전도 축보다 2 m 안쪽 · 지반 허용 압력 150 kPa · 양중 능력 표는 임계 하중의 80%로 계산.</p>
+        <p class="note">실제 장비 제원이 아니라 지문의 관계식을 암산으로 확인하기 위해 고른 값이다.</p>
+      </div>
+      <div class="card">
+        <h3>직접 확인해 볼 세 가지</h3>
+        <p>① 아웃트리거를 끄면 허용 하중이 몇 분의 일로 줄어드는가.</p>
+        <p>② 같은 무게라도 붐을 눕히면(각도를 줄이면) 왜 위험해지는가.</p>
+        <p>③ 받침목을 빼면 접지압이 얼마나 올라가고, 그것이 A에 어떤 영향을 주는가.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:26px">양중 능력 표</h3>
+    <p class="note">현재 설정에서 붐 길이와 작업 반경 조합별 허용 하중이다. 빈칸은 그 조합이 기하학적으로 불가능한 구간이다.</p>
+    <div id="capTable"></div>
+  </section>
+
+  <!-- ============ 7 ============ -->
+  <section class="panel" id="p7" role="tabpanel">
+    <div class="hd">
+      <div class="kicker num">7 / 8</div>
+      <h2>크롤러 크레인과 험지형 크레인</h2>
+    </div>
+    <p class="lede">보기에 나온 두 크레인이다. 하부 주행 장치가 다르면 붐도, 잘하는 일도 달라진다.</p>
+
+    <div class="lab">
+      <div class="stage">
+        <svg id="compare" viewBox="0 0 760 340" role="img" aria-label="크롤러 크레인과 험지형 크레인 비교"></svg>
+      </div>
+      <div class="deck">
+        <div class="ctl">
+          <h3>성능 비교</h3>
+          <svg id="radar" viewBox="0 0 300 280" role="img" aria-label="두 크레인의 성능 비교 그래프"></svg>
+          <div class="legend">
+            <span><i style="background:rgba(42,57,71,.55)"></i>크롤러 크레인</span>
+            <span><i style="background:rgba(245,183,0,.55)"></i>험지형 크레인</span>
+          </div>
+          <p class="note" style="margin-top:8px">선회 반경은 작을수록 유리하므로 값이 클수록 좁은 곳에 잘 들어간다는 뜻으로 그렸다.</p>
+        </div>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th style="width:20%">항목</th><th>ⓐ 크롤러 크레인</th><th>ⓑ 험지형 크레인</th></tr></thead>
+      <tbody>
+        <tr><td>하부 주행 장치</td><td class="y">무한궤도</td><td class="y">고무 타이어</td></tr>
+        <tr><td>붐 형식</td><td>주로 격자형 붐, 끝에 보조 붐을 붙이기도 한다</td><td>주로 유압식 붐</td></tr>
+        <tr><td>크기와 무게</td><td>건설 현장 이동식 크레인 중 가장 무겁고 크다</td><td>상대적으로 작고 가볍다</td></tr>
+        <tr><td>기동성</td><td>떨어진다. 먼 거리는 분해해 트레일러로 옮긴다</td><td>스스로 주행해 현장 안을 옮겨 다닌다</td></tr>
+        <tr><td>인양 효율</td><td class="y">뛰어나다. 자중이 커 안정 모멘트가 크다</td><td>중소형 하중에 적합하다</td></tr>
+        <tr><td>선회 반경</td><td>크다</td><td class="y">매우 작다 — 협소한 공간에 유리</td></tr>
+        <tr><td>지반 대응</td><td>접지 면적이 넓어 연약 지반에서도 버틴다</td><td>아웃트리거로 고정해 인양 능력을 끌어올린다</td></tr>
+      </tbody>
+    </table>
+
+    <div class="quote">보기 문제의 함정 — 크롤러 크레인에 달린 <b>격자형 붐은 유압 실린더로 길이를 조절할 수 없다.</b> 두 크레인 모두 "붐이 도달 범위와 높이를 결정한다"는 점은 같지만, 길이를 조절하는 방식은 다르다.</div>
+  </section>
+
+  <!-- ============ 8 ============ -->
+  <section class="panel" id="p8" role="tabpanel">
+    <div class="hd">
+      <div class="kicker num">8 / 8</div>
+      <h2>한국의 크레인 산업, 그리고 특수 목적 크레인</h2>
+    </div>
+    <p class="lede">"제조 강국"이라는 말로 뭉뚱그리면 실상을 놓친다. 한국은 크레인 안에서도 잘하는 영역과 거의 못 하는 영역이 뚜렷하게 갈린다.</p>
+
+    <div class="grid3" style="margin-top:18px">
+      <div class="card" style="border-top:4px solid var(--safe)">
+        <h3>강한 영역 — 선박용 크레인</h3>
+        <p>오리엔탈정공이 선박 크레인 국내 시장의 약 70%를 차지한다. 프로비전 크레인, 호스 핸들링 크레인, 데크 크레인을 만들고 영하 60도에서 작동하는 극저온 크레인도 개발했다. 주 고객은 국내 조선 3사다.</p>
+      </div>
+      <div class="card" style="border-top:4px solid var(--safe)">
+        <h3>강한 영역 — 소형 특장 크레인</h3>
+        <p>트럭에 얹는 카고 크레인과 특수 목적 차량은 국내 제조 기반이 탄탄하다. 수산중공업이 최대 하중 2.2~7.6톤급 라인업을 갖고 있고, 광림, 진우에스엠씨 같은 회사가 고소작업차와 소방 특수차를 만든다.</p>
+      </div>
+      <div class="card" style="border-top:4px solid var(--caution)">
+        <h3>되찾는 중 — 항만 크레인</h3>
+        <p>HJ중공업은 컨테이너·벌크 크레인을 자체 제작하고, 두산에너빌리티는 베트남 법인 두산비나를 통해 RTG와 컨테이너 크레인을 공급한다. HD현대삼호는 부산신항 서컨테이너터미널 2-6단계 크레인 제작·설치 계약을 1,796억 원 규모로 맺었다.</p>
+      </div>
+      <div class="card" style="border-top:4px solid var(--caution)">
+        <h3>거대한 설비 — 골리앗 크레인</h3>
+        <p>조선소 도크 위를 레일로 오가며 선박 블록을 얹는다. 군산조선소는 국내 최대급인 1,650톤급 골리앗 크레인을 갖췄다. 조선 경기가 꺾이면 해외로 팔려 나가기도 한다.</p>
+      </div>
+      <div class="card" style="border-top:4px solid var(--alarm)">
+        <h3>약한 영역 — 대형 이동식 크레인</h3>
+        <p>지문에 나온 바로 그 장비, 특히 전지형 크레인과 대형 크롤러 크레인에는 한국 브랜드가 사실상 없다. Liebherr, Tadano, XCMG, SANY 같은 해외 제조사가 세계 시장을 나눠 갖고 있다.</p>
+      </div>
+      <div class="card" style="border-top:4px solid var(--alarm)">
+        <h3>세계 구도</h3>
+        <p>항만 크레인은 중국 ZPMC가 세계 점유율 70%, 미국 내 점유율은 80%대다. 이동식 크레인 시장은 2025년 153억 달러 규모이고 2026~2035년 연평균 5.2% 성장이 전망된다. 그중 전지형 크레인이 38.3%로 가장 큰 몫을 차지한다.</p>
+      </div>
+    </div>
+
+    <div class="quote" style="border-left-color:var(--steel-700)">토론거리 — 카고 크레인은 국산이 많은데 왜 대형 이동식 크레인은 전량에 가깝게 수입할까. 설계 축적, 시장 규모, 인증과 안전 규격, 유지보수망 가운데 무엇이 가장 큰 벽일지 근거를 대 보라.</div>
+
+    <h3 style="margin-top:30px">특수 목적 크레인 — 지문의 원리가 어떻게 변형되는가</h3>
+    <p class="note">일반 크레인은 전도 축을 기준으로 버틴다. 아래 장비들은 그 "버티는 방식"을 각자 다르게 푼다. 질문을 먼저 생각해 보고 답을 열어 보라.</p>
+    <div id="specials"></div>
+    <p class="srcline" style="margin-top:18px">산업 현황의 수치와 계약 사례는 오리엔탈정공·수산중공업 등 각 사 공개 자료, 한국 위키백과, 팍스경제TV, 한스경제, 나무위키, GM Insights 시장 보고서를 정리한 것이다. 시장 수치와 수주 내역은 바뀔 수 있으니 수업 전에 한 번 확인하는 편이 좋다.</p>
+  </section>
+
+  </main>
+</div>
+
+<aside id="quizPanel" aria-label="형성평가">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <h2 style="font-size:1.15rem">형성평가</h2>
+    <button class="tbtn" id="quizClose" style="border-color:var(--steel-300);color:var(--steel-700)">닫기</button>
+  </div>
+  <div class="stu">
+    <label>학번<input id="stuId" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="예: 30115"></label>
+    <label>이름<input id="stuName" autocomplete="off" maxlength="20" placeholder="이름"></label>
+  </div>
+  <div class="score" id="scoreBox" style="display:none"></div>
+  <div id="quizList"></div>
+  <div class="btnrow">
+    <button class="play" id="submitBtn">채점 및 제출</button>
+    <button class="tbtn" id="resetBtn" style="border-color:var(--steel-300);color:var(--steel-700)">다시 풀기</button>
+  </div>
+  <div class="msg" id="submitMsg" role="status" aria-live="polite"></div>
+</aside>
+
+<script>
+(function(){
+"use strict";
+var $ = function(s,r){return (r||document).querySelector(s);};
+var $$ = function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+var NS = "http://www.w3.org/2000/svg";
+var RAD = Math.PI/180;
+var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- 탭 ---------------- */
+var tabs = $$(".rail button");
+function show(id){
+  tabs.forEach(function(t){ t.setAttribute("aria-selected", t.dataset.p===id ? "true":"false"); });
+  $$(".panel").forEach(function(p){ p.classList.toggle("on", p.id===id); });
+  window.scrollTo({top:0, behavior: reduce ? "auto":"smooth"});
+}
+tabs.forEach(function(t){ t.addEventListener("click", function(){ show(t.dataset.p); }); });
+$$("[data-go]").forEach(function(b){ b.addEventListener("click", function(){ show(b.dataset.go); }); });
+
+/* ---------------- 큰 글씨 ---------------- */
+$("#bigBtn").addEventListener("click", function(){
+  var on = document.body.classList.toggle("big");
+  this.setAttribute("aria-pressed", on ? "true":"false");
+  this.textContent = on ? "보통 글씨" : "큰 글씨";
+});
+
+/* ---------------- 머리말 크레인 1회 기복 ---------------- */
+(function(){
+  if(reduce) return;
+  var g = $("#mastBoom"), t0 = null;
+  function step(ts){
+    if(!t0) t0 = ts;
+    var k = Math.min((ts-t0)/1400, 1);
+    var e = k<.5 ? 2*k*k : 1-Math.pow(-2*k+2,2)/2;
+    g.setAttribute("transform","rotate("+(-32*Math.sin(e*Math.PI))+" 16 30)");
+    if(k<1) requestAnimationFrame(step);
+  }
+  setTimeout(function(){ requestAnimationFrame(step); }, 420);
+})();
+
+/* ---------------- 공통: 지면 ---------------- */
+function ground(y, x1, x2){
+  var s = '<line x1="'+x1+'" y1="'+y+'" x2="'+x2+'" y2="'+y+'" stroke="#2A3947" stroke-width="2.5"/>';
+  for(var x=x1; x<x2; x+=11){
+    s += '<line x1="'+x+'" y1="'+y+'" x2="'+(x-7)+'" y2="'+(y+8)+'" stroke="#8C9BA8" stroke-width="1"/>';
+  }
+  return s;
+}
+
+/* ================= 2. 해부도 ================= */
+var PARTS = [
+  {id:"boom", n:"붐", x:352, y:238,
+   role:"인양하는 물체를 지지하는 긴 팔이다. 붐의 길이와 각도가 물체를 옮기는 데 필요한 도달 범위와 높이를 결정한다.",
+   text:"인양하는 물체를 지지하는 긴 팔 모양의 붐은 물체를 옮기는 데 필요한 도달 범위와 높이를 결정한다.",
+   gone:"물체를 크레인 본체 바로 옆에서만 들 수 있다. 사실상 크레인이 아니게 된다."},
+  {id:"jib", n:"보조 붐", x:620, y:134,
+   role:"붐 끝에 덧붙여 도달 범위를 더 늘린다. 붐과 따로 기복할 수 있으면 움직이는 범위가 훨씬 넓어진다.",
+   text:"붐에는 도달 범위를 더 확장할 수 있는 보조 붐을 부착하기도 한다.",
+   gone:"높은 건물 너머로 물체를 넘기는 작업처럼 멀고 높은 지점에 닿기 어려워진다."},
+  {id:"rope", n:"와이어로프", x:404, y:255,
+   role:"여러 가닥의 강철 철사를 합쳐 꼬아 만든 줄이다. 물체를 매달아 들어 올리고, 붐 각도를 바꾸는 데도 쓰인다.",
+   text:"여러 가닥의 강철 철사를 합쳐 꼬아 만든 줄인 와이어로프를 사용해 들어 올린다.",
+   gone:"물체를 매달 방법이 없다. 한 가닥 철사로는 같은 무게를 버티지 못한다."},
+  {id:"hook", n:"후크", x:404, y:300,
+   role:"갈고리 모양으로 물체를 거는 부분이다. 후크 자체의 무게도 하중에 포함해서 계산해야 한다.",
+   text:"크레인은 대부분 물체를 갈고리 모양의 후크에 걸고 와이어로프를 사용해 들어 올린다.",
+   gone:"물체를 걸 수 없다. 참고로 양중 능력 표는 후크 무게까지 더한 값으로 만든다."},
+  {id:"outrig", n:"아웃트리거", x:322, y:378,
+   role:"차체 밖으로 뻗어 나와 지면을 딛는 지지 다리다. 크레인을 고정해 전도 축을 바깥으로 밀어내므로 더 무거운 물체를 들 수 있다.",
+   text:"아웃트리거는 크레인을 지탱하는 장치로, 크레인을 고정해 더 무거운 물체를 들어 올릴 수 있게 한다.",
+   gone:"전도 축이 안쪽으로 들어와 거리 A가 줄고, 같은 붐 자세에서 허용 하중이 크게 떨어진다."},
+  {id:"mat", n:"크레인 받침목", x:322, y:410,
+   role:"아웃트리거 발 밑에 까는 두꺼운 판이다. 접지 면적을 넓혀 지면에 가해지는 압력을 분산하고 크레인이 땅 밑으로 가라앉지 않게 한다.",
+   text:"크레인으로부터 지면에 가해지는 압력을 분산하고 크레인이 땅 밑으로 가라앉지 않게 하려고 크레인 받침목을 설치하기도 한다.",
+   gone:"한쪽 발이 지반에 박히면서 크레인이 기울어진다. 수평을 잃으면 전도 위험이 급격히 올라간다."},
+  {id:"cwt", n:"평형추", x:126, y:300,
+   role:"하중이 걸리는 반대쪽에 다는 강철이나 콘크리트 덩어리다. 크레인 중량을 늘려 안정 모멘트를 키운다.",
+   text:"하중이 가해지는 반대쪽에 강철 또는 콘크리트로 만든 평형추를 설치해 안정 모멘트를 증가시켜 크레인이 넘어지는 것을 막을 수도 있다.",
+   gone:"안정 모멘트가 줄어 같은 물체를 들어도 전도에 훨씬 가까워진다."},
+  {id:"cog", n:"크레인 무게 중심", x:196, y:340,
+   role:"크레인 전체 무게가 한 점에 모여 있다고 볼 수 있는 지점이다. 이 점부터 전도 축까지의 수평 거리가 거리 A다.",
+   text:"전도 축을 기준으로 크레인 본체 방향의 크레인 중량과 크레인의 무게 중심으로부터 전도축까지의 수평 거리(A)를 곱한 '안정 모멘트'",
+   gone:"무게 중심이 전도 축 바깥으로 넘어가면 물체를 들지 않아도 크레인이 스스로 기운다."},
+  {id:"axis", n:"전도 축", x:352, y:400,
+   role:"크레인이 넘어질 때 회전의 중심이 되는 가상의 축이다. 안정성을 따질 때 모든 거리의 기준점이다.",
+   text:"전도 축은 크레인이 물체를 들어 올릴 때 안정성의 기준이 되는 가상의 축을 의미한다.",
+   gone:"기준선이 없으면 안정 모멘트도 양중 모멘트도 계산할 수 없다. 아웃트리거를 펴면 이 축이 바깥으로 이동한다."},
+  {id:"upper", n:"상부 선회체", x:206, y:300,
+   role:"운전실과 권상 장치가 실린 부분으로, 하부 주행체 위에서 수직축을 중심으로 돌아간다. 선회가 일어나는 곳이다.",
+   text:"붐이나 보조 붐이 수평 방향으로 움직이는 것은 선회라고 한다.",
+   gone:"물체를 든 채로 방향을 바꿀 수 없어, 크레인을 통째로 움직여야 한다."},
+  {id:"lower", n:"하부 주행체", x:186, y:372,
+   role:"타이어나 무한궤도를 달고 크레인을 현장으로 옮긴다. 무한궤도는 접지 면적이 넓어 연약 지반에 강하고, 타이어는 빠르게 이동한다.",
+   text:"이동식 크레인은 바퀴에 타이어나 무한궤도를 장착하고 동력을 사용하여 화물을 들어 올리거나 수평으로 운반하는 장비이다.",
+   gone:"작업이 필요한 지역으로 옮겨 갈 수 없다. 이동식 크레인의 가장 큰 장점이 사라진다."},
+  {id:"load", n:"물체의 중심축", x:404, y:340,
+   role:"들어 올리는 물체의 무게가 걸리는 수직선이다. 전도 축부터 이 선까지의 수평 거리가 거리 B, 곧 작업 반경이다.",
+   text:"들어 올리는 물체의 중심축부터 전도 축까지의 수평 거리(B)와 물체의 무게를 곱한 '양중 모멘트'",
+   gone:"붐을 세울수록 이 선이 전도 축 쪽으로 당겨져 양중 모멘트가 작아진다."}
+];
+
+(function(){
+  var sv = $("#anatomy");
+  var s = "";
+  s += ground(400, 20, 740);
+  s += '<text x="26" y="30" font-size="12" fill="#8C9BA8">노란 점을 누르면 그 부품의 역할이 나온다</text>';
+  /* --- 하부 주행체 --- */
+  s += '<rect x="112" y="358" width="166" height="26" rx="3" fill="#4A5C6E"/>';
+  s += '<rect x="118" y="362" width="154" height="18" rx="9" fill="#2A3947"/>';
+  [138,168,198,228,258].forEach(function(cx){
+    s += '<circle cx="'+cx+'" cy="371" r="8" fill="#8C9BA8"/>';
+  });
+  /* --- 상부 선회체 + 운전실 --- */
+  s += '<rect x="128" y="312" width="132" height="46" rx="3" fill="#F5B700"/>';
+  s += '<rect x="228" y="296" width="42" height="42" rx="3" fill="#2A3947"/>';
+  s += '<rect x="234" y="302" width="30" height="18" rx="2" fill="#8C9BA8"/>';
+  /* --- 평형추 --- */
+  s += '<rect x="108" y="290" width="38" height="52" rx="2" fill="#2A3947"/>';
+  s += '<line x1="108" y1="304" x2="146" y2="304" stroke="#4A5C6E" stroke-width="2"/>';
+  s += '<line x1="108" y1="318" x2="146" y2="318" stroke="#4A5C6E" stroke-width="2"/>';
+  /* --- 유압식 붐 --- */
+  var px=262, py=336, ang=50*RAD, L=196;
+  var tx=px+L*Math.cos(ang), ty=py-L*Math.sin(ang);
+  s += '<g transform="rotate(-50 '+px+' '+py+')">'
+     + '<rect x="'+px+'" y="'+(py-13)+'" width="'+L+'" height="26" rx="4" fill="#F5B700" stroke="#B98B06" stroke-width="1.5"/>'
+     + '<rect x="'+(px+100)+'" y="'+(py-10)+'" width="92" height="20" rx="3" fill="#FFD34D"/>'
+     + '</g>';
+  s += '<text x="248" y="252" font-size="12" font-weight="700" fill="#17202B">유압식 붐</text>';
+  s += '<line x1="306" y1="248" x2="336" y2="256" stroke="#8C9BA8" stroke-width="1"/>';
+  /* --- 와이어로프 + 후크 + 하중 --- */
+  s += '<line x1="'+tx+'" y1="'+ty+'" x2="'+tx+'" y2="292" stroke="#2A3947" stroke-width="2.5" stroke-dasharray="6 3"/>';
+  s += '<path d="M'+(tx-8)+' 292 a8 8 0 0 0 16 0" fill="none" stroke="#2A3947" stroke-width="3.4"/>';
+  s += '<rect x="'+(tx-28)+'" y="304" width="56" height="50" rx="2" fill="#4A5C6E"/>';
+  s += '<circle cx="'+tx+'" cy="329" r="8" fill="#EDEFF1"/>';
+  s += '<line x1="'+tx+'" y1="354" x2="'+tx+'" y2="418" stroke="#D8341F" stroke-width="1.4" stroke-dasharray="5 4"/>';
+  /* --- 아웃트리거 + 받침목 --- */
+  s += '<line x1="278" y1="352" x2="322" y2="386" stroke="#4A5C6E" stroke-width="9" stroke-linecap="round"/>';
+  s += '<rect x="306" y="386" width="34" height="9" rx="2" fill="#2A3947"/>';
+  s += '<rect x="296" y="396" width="54" height="8" rx="1" fill="#8C6A3A"/>';
+  /* --- 전도축 --- */
+  s += '<line x1="323" y1="268" x2="323" y2="424" stroke="#D8341F" stroke-width="1.6" stroke-dasharray="9 5"/>';
+  /* --- 무게중심 --- */
+  s += '<g transform="translate(196,340)"><circle r="10" fill="#fff" stroke="#17202B" stroke-width="1.6"/>'
+     + '<path d="M0 -10 A10 10 0 0 1 0 10 Z" fill="#17202B"/>'
+     + '<circle r="10" fill="none" stroke="#17202B" stroke-width="1.6"/></g>';
+  /* --- 치수선 A, B --- */
+  s += '<line x1="196" y1="424" x2="323" y2="424" stroke="#17202B" stroke-width="1.2"/>';
+  s += '<text x="256" y="440" font-size="13" font-weight="700" fill="#17202B" text-anchor="middle">A</text>';
+  s += '<line x1="323" y1="424" x2="'+tx+'" y2="424" stroke="#17202B" stroke-width="1.2"/>';
+  s += '<text x="'+((323+tx)/2)+'" y="440" font-size="13" font-weight="700" fill="#17202B" text-anchor="middle">B</text>';
+  /* --- 오른쪽: 격자형 붐 + 보조 붐 (지문 그림과 같은 배치) --- */
+  (function(){
+    function truss(x0,y0,x1,y1,w,steps,col){
+      var dx=x1-x0, dy=y1-y0, len=Math.sqrt(dx*dx+dy*dy);
+      var ux=-dy/len*w, uy=dx/len*w, o="";
+      o += '<line x1="'+(x0+ux)+'" y1="'+(y0+uy)+'" x2="'+(x1+ux)+'" y2="'+(y1+uy)+'" stroke="'+col+'" stroke-width="2.6"/>';
+      o += '<line x1="'+(x0-ux)+'" y1="'+(y0-uy)+'" x2="'+(x1-ux)+'" y2="'+(y1-uy)+'" stroke="'+col+'" stroke-width="2.6"/>';
+      for(var k=0;k<steps;k++){
+        var a=k/steps, b=(k+0.5)/steps, c=(k+1)/steps;
+        o += '<line x1="'+(x0+ux+dx*a)+'" y1="'+(y0+uy+dy*a)+'" x2="'+(x0-ux+dx*b)+'" y2="'+(y0-uy+dy*b)+'" stroke="'+col+'" stroke-width="1.8"/>';
+        o += '<line x1="'+(x0-ux+dx*b)+'" y1="'+(y0-uy+dy*b)+'" x2="'+(x0+ux+dx*c)+'" y2="'+(y0+uy+dy*c)+'" stroke="'+col+'" stroke-width="1.8"/>';
+      }
+      return o;
+    }
+    var bx=566, by=406, ba=79*RAD, BL=236;
+    var btx=bx+BL*Math.cos(ba), bty=by-BL*Math.sin(ba);
+    s += truss(bx,by,btx,bty,8,9,"#4A5C6E");
+    var ja=84*RAD, JL=118;
+    var jtx=btx+JL*Math.cos(ja), jty=bty-JL*Math.sin(ja);
+    s += truss(btx,bty,jtx,jty,5,6,"#B98B06");
+    s += '<text x="500" y="300" font-size="12" font-weight="700" fill="#17202B">격자형 붐</text>';
+    s += '<line x1="558" y1="296" x2="'+(bx+26)+'" y2="286" stroke="#8C9BA8" stroke-width="1"/>';
+    s += '<text x="646" y="112" font-size="12" font-weight="700" fill="#B98B06">보조 붐</text>';
+    s += '<line x1="642" y1="108" x2="'+(btx+16)+'" y2="126" stroke="#8C9BA8" stroke-width="1"/>';
+    s += '<text x="470" y="440" font-size="11" fill="#8C9BA8">세그먼트를 이어 붙인 격자형 붐과 그 끝의 보조 붐</text>';
+  })();
+
+  /* 핫스팟 */
+  PARTS.forEach(function(p,i){
+    s += '<g class="hs" data-id="'+p.id+'" tabindex="0" role="button" aria-label="'+p.n+'">'
+       + '<circle class="hit" cx="'+p.x+'" cy="'+p.y+'" r="8"/>'
+       + '<text x="'+p.x+'" y="'+(p.y+4)+'" text-anchor="middle" fill="#17202B">'+(i+1)+'</text>'
+       + '</g>';
+  });
+  sv.innerHTML = s;
+
+  var chips = $("#partChips");
+  PARTS.forEach(function(p,i){
+    var b = document.createElement("button");
+    b.className="chip"; b.dataset.id=p.id; b.setAttribute("aria-pressed","false");
+    b.textContent=(i+1)+". "+p.n;
+    chips.appendChild(b);
+  });
+
+  function pick(id){
+    var p = PARTS.filter(function(q){return q.id===id;})[0];
+    if(!p) return;
+    $$(".hs", sv).forEach(function(g){ g.classList.toggle("sel", g.dataset.id===id); });
+    $$("#partChips .chip").forEach(function(c){ c.setAttribute("aria-pressed", c.dataset.id===id?"true":"false"); });
+    $("#partName").textContent = p.n;
+    $("#partBody").innerHTML =
+      '<dt>하는 일</dt><dd>'+p.role+'</dd>'
+     +'<dt>지문의 근거</dt><dd style="color:#4A5C6E">'+p.text+'</dd>'
+     +'<dt>없으면 생기는 일</dt><dd>'+p.gone+'</dd>';
+  }
+  $$(".hs", sv).forEach(function(g){
+    g.addEventListener("click", function(){ pick(g.dataset.id); });
+    g.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pick(g.dataset.id); } });
+  });
+  $$("#partChips .chip").forEach(function(c){ c.addEventListener("click", function(){ pick(c.dataset.id); }); });
+})();
+
+/* ================= 3. 붐 애니메이션 ================= */
+function drawHyd(k){
+  var sv=$("#hydBoom"), s="";
+  s += ground(210, 10, 350);
+  s += '<rect x="24" y="182" width="86" height="22" rx="3" fill="#4A5C6E"/>';
+  s += '<circle cx="42" cy="205" r="7" fill="#8C9BA8"/><circle cx="92" cy="205" r="7" fill="#8C9BA8"/>';
+  s += '<rect x="34" y="158" width="66" height="26" rx="3" fill="#2A3947"/>';
+  var px=96, py=166;
+  var base=78, ext=k*104;
+  s += '<g transform="rotate(-34 '+px+' '+py+')">';
+  s += '<rect x="'+px+'" y="'+(py-15)+'" width="'+base+'" height="30" rx="4" fill="#B98B06"/>';
+  s += '<rect x="'+(px+base-12)+'" y="'+(py-11)+'" width="'+(58+ext*0.55)+'" height="22" rx="3" fill="#F5B700"/>';
+  s += '<rect x="'+(px+base+40+ext*0.55)+'" y="'+(py-7)+'" width="'+(42+ext*0.45)+'" height="14" rx="3" fill="#FFD34D"/>';
+  s += '<line x1="'+(px+18)+'" y1="'+py+'" x2="'+(px+base+30+ext*0.6)+'" y2="'+py+'" stroke="#2A3947" stroke-width="3" stroke-dasharray="4 4" opacity=".55"/>';
+  s += '</g>';
+  var total=base+82+ext;
+  var tx=px+total*Math.cos(34*RAD), ty=py-total*Math.sin(34*RAD);
+  s += '<line x1="'+tx+'" y1="'+ty+'" x2="'+tx+'" y2="'+(ty+34)+'" stroke="#2A3947" stroke-width="2"/>';
+  s += '<path d="M'+(tx-6)+' '+(ty+34)+' a6 6 0 0 0 12 0" fill="none" stroke="#2A3947" stroke-width="3"/>';
+  s += '<text x="16" y="28" font-size="12" fill="#8C9BA8">실린더가 안쪽 단을 밀어낸다</text>';
+  s += '<text x="16" y="46" font-size="15" font-weight="800" fill="#17202B">길이 '+(12+Math.round(k*16))+' m</text>';
+  sv.innerHTML=s;
+}
+function drawLat(k){
+  var sv=$("#latBoom"), s="";
+  s += ground(210, 10, 350);
+  s += '<rect x="24" y="178" width="92" height="26" rx="3" fill="#4A5C6E"/>';
+  s += '<rect x="28" y="182" width="84" height="16" rx="8" fill="#2A3947"/>';
+  s += '<rect x="34" y="152" width="70" height="28" rx="3" fill="#2A3947"/>';
+  var px=100, py=162, seg=30, n=6;
+  var shown = k*n;
+  s += '<g transform="rotate(-38 '+px+' '+py+')">';
+  for(var i=0;i<n;i++){
+    var vis = Math.max(0, Math.min(1, shown - i));
+    if(vis<=0) continue;
+    var x0=px+i*seg, w=seg;
+    var op = vis, dy = (1-vis)*-40;
+    s += '<g opacity="'+op+'" transform="translate(0,'+dy+')">';
+    s += '<line x1="'+x0+'" y1="'+(py-11)+'" x2="'+(x0+w)+'" y2="'+(py-11)+'" stroke="#4A5C6E" stroke-width="3"/>';
+    s += '<line x1="'+x0+'" y1="'+(py+11)+'" x2="'+(x0+w)+'" y2="'+(py+11)+'" stroke="#4A5C6E" stroke-width="3"/>';
+    s += '<line x1="'+x0+'" y1="'+(py-11)+'" x2="'+(x0+w/2)+'" y2="'+(py+11)+'" stroke="#4A5C6E" stroke-width="2"/>';
+    s += '<line x1="'+(x0+w/2)+'" y1="'+(py+11)+'" x2="'+(x0+w)+'" y2="'+(py-11)+'" stroke="#4A5C6E" stroke-width="2"/>';
+    s += '<circle cx="'+x0+'" cy="'+(py-11)+'" r="3" fill="#F5B700"/>';
+    s += '<circle cx="'+x0+'" cy="'+(py+11)+'" r="3" fill="#F5B700"/>';
+    s += '</g>';
+  }
+  s += '</g>';
+  var done=Math.floor(shown);
+  if(done>0){
+    var total=done*seg;
+    var tx=px+total*Math.cos(38*RAD), ty=py-total*Math.sin(38*RAD);
+    s += '<line x1="'+tx+'" y1="'+ty+'" x2="'+tx+'" y2="'+(ty+30)+'" stroke="#2A3947" stroke-width="2"/>';
+    s += '<path d="M'+(tx-6)+' '+(ty+30)+' a6 6 0 0 0 12 0" fill="none" stroke="#2A3947" stroke-width="3"/>';
+  }
+  s += '<text x="16" y="28" font-size="12" fill="#8C9BA8">트러스 조각을 볼트로 이어 붙인다</text>';
+  s += '<text x="16" y="46" font-size="15" font-weight="800" fill="#17202B">세그먼트 '+done+' / '+n+'</text>';
+  sv.innerHTML=s;
+}
+drawHyd(1); drawLat(1);
+$$("[data-anim]").forEach(function(b){
+  b.addEventListener("click", function(){
+    var fn = b.dataset.anim==="hyd" ? drawHyd : drawLat;
+    if(reduce){ fn(1); return; }
+    var t0=null;
+    (function run(ts){
+      if(!t0) t0=ts;
+      var k=Math.min((ts-t0)/1800,1);
+      fn(k<.5 ? 0 : (k-.5)/.5);
+      if(k<1) requestAnimationFrame(run);
+    })(performance.now());
+  });
+});
+
+/* ================= 4. 기복 · 선회 ================= */
+(function(){
+  var sv=$("#dualView");
+  var luff=$("#luff"), slew=$("#slew"), tel=$("#tel");
+  function draw(){
+    var th=+luff.value, ph=+slew.value, L=+tel.value;
+    $("#luffV").textContent=th; $("#slewV").textContent=ph; $("#telV").textContent=L;
+    var S=6.0, s="";
+    /* 구분선 */
+    s += '<line x1="380" y1="14" x2="380" y2="386" stroke="#C7D0D8" stroke-width="2"/>';
+    s += '<text x="22" y="30" font-size="13" font-weight="800" fill="#17202B">옆에서 본 모습 — 기복</text>';
+    s += '<text x="402" y="30" font-size="13" font-weight="800" fill="#17202B">위에서 본 모습 — 선회</text>';
+
+    /* ---- 측면도 ---- */
+    s += ground(330, 20, 366);
+    var px=118, py=292;
+    s += '<rect x="66" y="306" width="104" height="20" rx="3" fill="#4A5C6E"/>';
+    s += '<circle cx="84" cy="327" r="6" fill="#8C9BA8"/><circle cx="152" cy="327" r="6" fill="#8C9BA8"/>';
+    s += '<rect x="74" y="282" width="82" height="26" rx="3" fill="#F5B700"/>';
+    s += '<rect x="58" y="276" width="22" height="32" rx="2" fill="#2A3947"/>';
+    /* 선회축: 수직 점선 */
+    s += '<line x1="'+px+'" y1="58" x2="'+px+'" y2="344" stroke="#D8341F" stroke-width="1.4" stroke-dasharray="7 5"/>';
+    s += '<text x="'+(px+6)+'" y="70" font-size="11" fill="#D8341F">선회축 — 서 있다</text>';
+    /* 붐 */
+    var tx=px+L*S*Math.cos(th*RAD), ty=py-L*S*Math.sin(th*RAD);
+    s += '<line x1="'+px+'" y1="'+py+'" x2="'+tx+'" y2="'+ty+'" stroke="#F5B700" stroke-width="13" stroke-linecap="round"/>';
+    s += '<line x1="'+px+'" y1="'+py+'" x2="'+tx+'" y2="'+ty+'" stroke="#B98B06" stroke-width="13" stroke-linecap="round" opacity=".25"/>';
+    s += '<line x1="'+tx+'" y1="'+ty+'" x2="'+tx+'" y2="'+Math.min(ty+52,322)+'" stroke="#2A3947" stroke-width="2"/>';
+    s += '<rect x="'+(tx-11)+'" y="'+Math.min(ty+52,322)+'" width="22" height="18" rx="2" fill="#4A5C6E"/>';
+    /* 기복 호 */
+    var a1=px+L*S*Math.cos(20*RAD), b1=py-L*S*Math.sin(20*RAD);
+    var a2=px+L*S*Math.cos(80*RAD), b2=py-L*S*Math.sin(80*RAD);
+    s += '<path d="M'+a1+' '+b1+' A '+(L*S)+' '+(L*S)+' 0 0 0 '+a2+' '+b2+'" fill="none" stroke="#8C9BA8" stroke-width="1.4" stroke-dasharray="5 5"/>';
+    /* 기복축 표시 */
+    s += '<circle cx="'+px+'" cy="'+py+'" r="8" fill="#fff" stroke="#2E9E6B" stroke-width="2"/>';
+    s += '<line x1="'+(px-5)+'" y1="'+(py-5)+'" x2="'+(px+5)+'" y2="'+(py+5)+'" stroke="#2E9E6B" stroke-width="2"/>';
+    s += '<line x1="'+(px-5)+'" y1="'+(py+5)+'" x2="'+(px+5)+'" y2="'+(py-5)+'" stroke="#2E9E6B" stroke-width="2"/>';
+    s += '<text x="24" y="360" font-size="11" fill="#2E9E6B">⊗ 기복축 — 화면을 뚫고 지나가는 수평축</text>';
+    s += '<text x="24" y="376" font-size="11" fill="#4A5C6E">붐 끝이 세로 원호를 그린다</text>';
+
+    /* ---- 평면도 ---- */
+    var cx=558, cy=212, R=L*S*Math.cos(th*RAD);
+    s += '<circle cx="'+cx+'" cy="'+cy+'" r="'+(30*S*0.55)+'" fill="none" stroke="#C7D0D8" stroke-width="1.4" stroke-dasharray="5 5"/>';
+    s += '<circle cx="'+cx+'" cy="'+cy+'" r="'+Math.max(R,4)+'" fill="none" stroke="#8C9BA8" stroke-width="1.4" stroke-dasharray="5 5"/>';
+    s += '<g transform="rotate('+ph+' '+cx+' '+cy+')">';
+    s += '<rect x="'+(cx-30)+'" y="'+(cy-20)+'" width="60" height="40" rx="4" fill="#4A5C6E"/>';
+    s += '<rect x="'+(cx-40)+'" y="'+(cy-13)+'" width="16" height="26" rx="2" fill="#2A3947"/>';
+    s += '<line x1="'+cx+'" y1="'+cy+'" x2="'+(cx+Math.max(R,6))+'" y2="'+cy+'" stroke="#F5B700" stroke-width="13" stroke-linecap="round"/>';
+    s += '<circle cx="'+(cx+Math.max(R,6))+'" cy="'+cy+'" r="8" fill="#4A5C6E"/>';
+    /* 기복축: 붐에 수직인 수평선 */
+    s += '<line x1="'+cx+'" y1="'+(cy-76)+'" x2="'+cx+'" y2="'+(cy+76)+'" stroke="#2E9E6B" stroke-width="1.6" stroke-dasharray="7 5"/>';
+    s += '</g>';
+    s += '<circle cx="'+cx+'" cy="'+cy+'" r="8" fill="#fff" stroke="#D8341F" stroke-width="2"/>';
+    s += '<line x1="'+(cx-5)+'" y1="'+(cy-5)+'" x2="'+(cx+5)+'" y2="'+(cy+5)+'" stroke="#D8341F" stroke-width="2"/>';
+    s += '<line x1="'+(cx-5)+'" y1="'+(cy+5)+'" x2="'+(cx+5)+'" y2="'+(cy-5)+'" stroke="#D8341F" stroke-width="2"/>';
+    s += '<text x="402" y="360" font-size="11" fill="#D8341F">⊗ 선회축 — 화면을 뚫고 지나가는 수직축</text>';
+    s += '<text x="402" y="376" font-size="11" fill="#2E9E6B">초록 점선이 기복축 — 누워 있다</text>';
+    s += '<text x="402" y="52" font-size="11" fill="#4A5C6E">붐을 세울수록 위에서 본 붐이 짧아진다 (작업 반경 '+(L*Math.cos(th*RAD)).toFixed(1)+' m)</text>';
+    sv.innerHTML=s;
+  }
+  [luff,slew,tel].forEach(function(r){ r.addEventListener("input", draw); });
+  draw();
+
+  var playing=false;
+  $("#demoPlay").addEventListener("click", function(){
+    if(playing) return;
+    if(reduce){ luff.value=35; slew.value=90; tel.value=28; draw(); return; }
+    playing=true;
+    var t0=performance.now(), D=7200;
+    luff.value=55; slew.value=0; tel.value=20;
+    (function run(ts){
+      var k=(ts-t0)/D;
+      if(k>=1){ playing=false; draw(); return; }
+      if(k<0.34){
+        var u=k/0.34;
+        luff.value = Math.round(55 + 25*Math.sin(u*Math.PI*2));
+      } else if(k<0.68){
+        var u2=(k-0.34)/0.34;
+        slew.value = Math.round(120*Math.sin(u2*Math.PI*2));
+      } else {
+        var u3=(k-0.68)/0.32;
+        tel.value = Math.round(20 + 10*Math.sin(u3*Math.PI));
+      }
+      draw();
+      requestAnimationFrame(run);
+    })(performance.now());
+  });
+})();
+
+/* ================= 5. 보조 붐 작업 범위 ================= */
+(function(){
+  var sv=$("#envelope");
+  var jibOn=$("#jibOn"), ebLen=$("#ebLen"), ejLen=$("#ejLen");
+  var PX=150, PY=396, S=8.2, PH=3;   /* 피벗 높이 3 m */
+
+  function hull(L,J,maxOff){
+    var bins={}, pts=[];
+    for(var th=18; th<=82; th+=1){
+      for(var off=0; off<=maxOff; off+=(maxOff===0?1:3)){
+        var ja=(th-off)*RAD;
+        var x=L*Math.cos(th*RAD)+J*Math.cos(ja);
+        var y=L*Math.sin(th*RAD)+J*Math.sin(ja);
+        if(y<-PH) continue;
+        var phi=Math.atan2(y,x), r=Math.sqrt(x*x+y*y);
+        var key=Math.round(phi/RAD);
+        if(!bins[key] || bins[key].r<r) bins[key]={r:r, phi:phi};
+        if(maxOff===0) break;
+      }
+    }
+    Object.keys(bins).map(Number).sort(function(a,b){return a-b;}).forEach(function(k){
+      var b=bins[k];
+      pts.push([b.r*Math.cos(b.phi), b.r*Math.sin(b.phi)]);
+    });
+    return pts;
+  }
+  function areaOf(pts){
+    var a=0;
+    for(var i=0;i<pts.length;i++){
+      var p=pts[i], q=pts[(i+1)%pts.length];
+      a += p[0]*q[1]-q[0]*p[1];
+    }
+    return Math.abs(a)/2;
+  }
+  function pathOf(pts){
+    if(!pts.length) return "";
+    var d="M"+PX+" "+PY;
+    pts.forEach(function(p){ d += " L"+(PX+p[0]*S)+" "+(PY-p[1]*S); });
+    return d+" Z";
+  }
+  function draw(){
+    var L=+ebLen.value, J=+ejLen.value, on=jibOn.checked;
+    $("#ebL").textContent=L; $("#ejL").textContent=J;
+    var base=hull(L,0,0);
+    var full=on ? hull(L,J,60) : base;
+    var aB=areaOf(base), aF=areaOf(full);
+    var mh=0, mr=0;
+    full.forEach(function(p){ if(p[1]>mh) mh=p[1]; if(p[0]>mr) mr=p[0]; });
+    $("#mH").textContent=(mh+PH).toFixed(1);
+    $("#mR").textContent=mr.toFixed(1);
+    $("#mA").textContent=Math.round(aF/aB*100);
+
+    var s="";
+    s += ground(396, 20, 740);
+    if(on) s += '<path d="'+pathOf(full)+'" fill="rgba(245,183,0,.42)" stroke="#B98B06" stroke-width="1.6"/>';
+    s += '<path d="'+pathOf(base)+'" fill="rgba(74,92,110,.34)" stroke="#4A5C6E" stroke-width="1.6"/>';
+    /* 본체 */
+    s += '<rect x="'+(PX-58)+'" y="'+(PY-14)+'" width="112" height="18" rx="9" fill="#2A3947"/>';
+    s += '<rect x="'+(PX-52)+'" y="'+(PY-38)+'" width="94" height="26" rx="3" fill="#F5B700"/>';
+    s += '<rect x="'+(PX-70)+'" y="'+(PY-44)+'" width="22" height="34" rx="2" fill="#2A3947"/>';
+    /* 대표 자세 */
+    var th=52, off=on?42:0;
+    var bx=PX+L*S*Math.cos(th*RAD), by=PY-L*S*Math.sin(th*RAD);
+    s += '<line x1="'+PX+'" y1="'+PY+'" x2="'+bx+'" y2="'+by+'" stroke="#17202B" stroke-width="9" stroke-linecap="round"/>';
+    if(on){
+      var ja=(th-off)*RAD;
+      var jx=bx+J*S*Math.cos(ja), jy=by-J*S*Math.sin(ja);
+      s += '<line x1="'+bx+'" y1="'+by+'" x2="'+jx+'" y2="'+jy+'" stroke="#D8341F" stroke-width="6" stroke-linecap="round"/>';
+      s += '<text x="'+(jx+8)+'" y="'+(jy-6)+'" font-size="12" font-weight="700" fill="#D8341F">보조 붐</text>';
+    }
+    s += '<text x="'+(bx-6)+'" y="'+(by-14)+'" font-size="12" font-weight="700" fill="#17202B" text-anchor="end">주 붐</text>';
+    /* 눈금 */
+    for(var m=10;m<=60;m+=10){
+      var gx=PX+m*S;
+      if(gx>736) break;
+      s += '<line x1="'+gx+'" y1="396" x2="'+gx+'" y2="404" stroke="#4A5C6E" stroke-width="1.4"/>';
+      s += '<text x="'+gx+'" y="420" font-size="11" fill="#4A5C6E" text-anchor="middle">'+m+'m</text>';
+    }
+    for(var h=10;h<=50;h+=10){
+      var gy=PY-h*S;
+      if(gy<26) break;
+      s += '<line x1="'+(PX-10)+'" y1="'+gy+'" x2="'+(PX-2)+'" y2="'+gy+'" stroke="#4A5C6E" stroke-width="1.4"/>';
+      s += '<text x="'+(PX-14)+'" y="'+(gy+4)+'" font-size="11" fill="#4A5C6E" text-anchor="end">'+h+'m</text>';
+    }
+    sv.innerHTML=s;
+  }
+  [jibOn,ebLen,ejLen].forEach(function(e){ e.addEventListener("input", draw); });
+  jibOn.addEventListener("change", draw);
+  draw();
+})();
+
+/* ================= 6. 모멘트 실험실 ================= */
+(function(){
+  var sv=$("#momentView"), over=$("#tipOver");
+  var WC=20, CW=12, S=13, GY=500, PVY=455, TIPX=300, GRAV=9.8, ALLOW=150;
+  var el={
+    w:$("#wLoad"), l:$("#mLen"), a:$("#mAng"), wind:$("#wind"),
+    out:$("#outrig"), mat:$("#mat"), cwt:$("#cwt")
+  };
+  var tipping=false, tipK=0, tipT0=0;
+
+  function state(){
+    var out=el.out.checked, mat=el.mat.checked, cw=el.cwt.checked;
+    var A0 = out?2:1, p = out?2:0;
+    var Wc = WC + (cw?CW:0);
+    var WL = +el.w.value, L=+el.l.value, th=+el.a.value, wind=+el.wind.value;
+    var area = out ? (mat?4:1) : 1.2;
+    var press = (Wc+WL)*GRAV/area;
+    var settle = out && !mat && press>ALLOW;
+    var A = settle ? A0*0.8 : A0;
+    var B = L*Math.cos(th*RAD) - p;
+    if(wind>10) B += 1;
+    if(B<0.5) B=0.5;
+    var Ms = Wc*A, Ml = WL*B;
+    return {out:out,mat:mat,cw:cw,A0:A0,p:p,Wc:Wc,WL:WL,L:L,th:th,wind:wind,
+            area:area,press:press,settle:settle,A:A,B:B,Ms:Ms,Ml:Ml,
+            sf:Ml>0?Ms/Ml:99, cap:(Ms/B)*0.8};
+  }
+
+  function draw(st, tilt){
+    var s="";
+    s += ground(GY, 20, 744);
+    s += '<g transform="rotate('+tilt+' '+TIPX+' '+GY+')">';
+    var PVX = TIPX - st.p*S;
+    var bodyC = TIPX - st.A0*S;
+    /* 하부 */
+    s += '<rect x="'+(bodyC-72)+'" y="'+(GY-30)+'" width="150" height="22" rx="4" fill="#4A5C6E"/>';
+    s += '<circle cx="'+(bodyC-50)+'" cy="'+(GY-7)+'" r="8" fill="#8C9BA8"/>';
+    s += '<circle cx="'+(bodyC+58)+'" cy="'+(GY-7)+'" r="8" fill="#8C9BA8"/>';
+    /* 상부 */
+    s += '<rect x="'+(bodyC-56)+'" y="'+(GY-62)+'" width="124" height="32" rx="3" fill="#F5B700"/>';
+    s += '<rect x="'+(bodyC+38)+'" y="'+(GY-80)+'" width="34" height="34" rx="3" fill="#2A3947"/>';
+    /* 평형추 */
+    if(st.cw){
+      s += '<rect x="'+(bodyC-80)+'" y="'+(GY-74)+'" width="30" height="46" rx="2" fill="#17202B"/>';
+      s += '<text x="'+(bodyC-65)+'" y="'+(GY-48)+'" font-size="10" fill="#F5B700" text-anchor="middle">12t</text>';
+    }
+    /* 아웃트리거 + 받침목 */
+    if(st.out){
+      s += '<line x1="'+(bodyC+60)+'" y1="'+(GY-34)+'" x2="'+TIPX+'" y2="'+(GY-8)+'" stroke="#4A5C6E" stroke-width="9" stroke-linecap="round"/>';
+      s += '<rect x="'+(TIPX-16)+'" y="'+(GY-10)+'" width="32" height="9" rx="2" fill="#2A3947"/>';
+      if(st.mat) s += '<rect x="'+(TIPX-30)+'" y="'+(GY-1)+'" width="60" height="9" rx="1" fill="#8C6A3A"/>';
+    }
+    /* 붐 */
+    var tx=PVX+st.L*S*Math.cos(st.th*RAD), ty=PVY-st.L*S*Math.sin(st.th*RAD);
+    s += '<line x1="'+PVX+'" y1="'+PVY+'" x2="'+tx+'" y2="'+ty+'" stroke="#F5B700" stroke-width="12" stroke-linecap="round"/>';
+    s += '<circle cx="'+PVX+'" cy="'+PVY+'" r="6" fill="#2A3947"/>';
+    /* 로프 + 하중 */
+    var hy=Math.min(ty+150, GY-56);
+    s += '<line x1="'+tx+'" y1="'+ty+'" x2="'+tx+'" y2="'+hy+'" stroke="#2A3947" stroke-width="2.4"/>';
+    var bs = 20+st.WL*2.8;
+    s += '<rect x="'+(tx-bs/2)+'" y="'+hy+'" width="'+bs+'" height="'+bs+'" rx="2" fill="#4A5C6E"/>';
+    s += '<text x="'+tx+'" y="'+(hy+bs/2+5)+'" font-size="12" font-weight="800" fill="#fff" text-anchor="middle">'+st.WL+'t</text>';
+    /* 무게중심 */
+    s += '<g transform="translate('+bodyC+','+(GY-44)+')"><circle r="9" fill="#fff" stroke="#17202B" stroke-width="1.6"/>'
+       + '<path d="M0 -9 A9 9 0 0 1 0 9 Z" fill="#17202B"/><circle r="9" fill="none" stroke="#17202B" stroke-width="1.6"/></g>';
+    s += '</g>';
+
+    /* 전도축 */
+    s += '<line x1="'+TIPX+'" y1="96" x2="'+TIPX+'" y2="'+(GY+26)+'" stroke="#D8341F" stroke-width="1.6" stroke-dasharray="9 5"/>';
+    s += '<text x="'+(TIPX+6)+'" y="110" font-size="11" font-weight="700" fill="#D8341F">전도 축</text>';
+    /* 치수 A, B */
+    var bodyC2 = TIPX - st.A0*S;
+    var lx = PVX + st.L*S*Math.cos(st.th*RAD);
+    s += '<line x1="'+bodyC2+'" y1="'+(GY+30)+'" x2="'+TIPX+'" y2="'+(GY+30)+'" stroke="#17202B" stroke-width="1.3"/>';
+    s += '<text x="'+((bodyC2+TIPX)/2)+'" y="'+(GY+46)+'" font-size="12" font-weight="700" fill="#17202B" text-anchor="middle">A '+st.A.toFixed(1)+'m</text>';
+    s += '<line x1="'+TIPX+'" y1="'+(GY+30)+'" x2="'+lx+'" y2="'+(GY+30)+'" stroke="#17202B" stroke-width="1.3"/>';
+    s += '<text x="'+((TIPX+lx)/2)+'" y="'+(GY+46)+'" font-size="12" font-weight="700" fill="#17202B" text-anchor="middle">B '+st.B.toFixed(1)+'m</text>';
+
+    /* 모멘트 막대 */
+    var scale = 218/Math.max(st.Ms, st.Ml, 40);
+    s += '<text x="34" y="34" font-size="12" font-weight="700" fill="#4A5C6E">안정 모멘트 '+st.Ms.toFixed(0)+' t·m</text>';
+    s += '<rect x="34" y="42" width="'+(st.Ms*scale)+'" height="16" fill="#2E9E6B"/>';
+    s += '<text x="34" y="80" font-size="12" font-weight="700" fill="#4A5C6E">양중 모멘트 '+st.Ml.toFixed(1)+' t·m</text>';
+    s += '<rect x="34" y="88" width="'+(st.Ml*scale)+'" height="16" fill="'+(st.Ml>st.Ms?"#D8341F":"#F5B700")+'"/>';
+    s += '<line x1="'+(34+st.Ms*scale)+'" y1="38" x2="'+(34+st.Ms*scale)+'" y2="110" stroke="#17202B" stroke-width="1.6" stroke-dasharray="4 3"/>';
+
+    if(st.settle){
+      s += '<text x="'+(TIPX+38)+'" y="'+(GY+70)+'" font-size="12" font-weight="700" fill="#D8341F">받침목 없음 — 지반이 눌려 수평이 무너지고 A가 20% 줄었다</text>';
+    }
+    if(st.wind>=15){
+      s += '<text x="470" y="46" font-size="13" font-weight="800" fill="#D8341F">강풍 — 운영 중단 대상</text>';
+    } else if(st.wind>10){
+      s += '<text x="470" y="46" font-size="13" font-weight="700" fill="#E08A0B">바람으로 작업 반경이 1m 늘어난 것으로 계산</text>';
+    }
+    sv.innerHTML=s;
+  }
+
+  function capTable(st){
+    var angs=[75,60,45,30], lens=[12,16,20,24,28];
+    var h='<table><thead><tr><th>붐 길이</th>';
+    angs.forEach(function(a){ h+='<th>붐 각도 '+a+'°</th>'; });
+    h+='</tr></thead><tbody>';
+    lens.forEach(function(L){
+      h+='<tr><td><b>'+L+' m</b></td>';
+      angs.forEach(function(a){
+        var B=L*Math.cos(a*RAD)-st.p;
+        if(B<1){ h+='<td class="note">—</td>'; return; }
+        var cap=(st.Ms/B)*0.8;
+        var cls = (L===st.L && a===st.th) ? ' class="y"' : '';
+        h+='<td'+cls+'>반경 '+B.toFixed(1)+' m<br><b>'+cap.toFixed(1)+' t</b></td>';
+      });
+      h+='</tr>';
+    });
+    return h+'</tbody></table>';
+  }
+
+  function update(){
+    var st=state();
+    $("#wV").textContent=st.WL; $("#lV").textContent=st.L;
+    $("#aV").textContent=st.th; $("#windV").textContent=st.wind;
+    $("#gMs").textContent=st.Ms.toFixed(0);
+    $("#gMl").textContent=st.Ml.toFixed(1);
+    $("#gA").textContent=st.A.toFixed(1);
+    $("#gB").textContent=st.B.toFixed(1);
+    $("#gSf").textContent=st.sf>9?"—":st.sf.toFixed(2);
+    $("#gCap").textContent=st.cap.toFixed(1);
+    $("#gPr").textContent=Math.round(st.press);
+    $("#matWrap").classList.toggle("off", !st.out);
+    el.mat.disabled = !st.out;
+    $("#capTable").innerHTML = capTable(st);
+
+    var v=$("#verdict"), sub=$("#verdictSub");
+    var extra = "";
+    if(st.press>ALLOW) extra += "접지압 "+Math.round(st.press)+" kPa로 허용치를 넘었다. ";
+    if(st.WL>st.cap+0.05) extra += "표에 실릴 양중 능력 "+st.cap.toFixed(1)+" t을 넘는 하중이다. ";
+    if(st.wind>=15) extra += "풍속 "+st.wind+" m/s에서는 작업을 중단해야 한다.";
+
+    if(st.sf<1){
+      v.className="verdict bad";
+      v.firstChild.nodeValue="전도 — 양중 모멘트가 안정 모멘트를 넘었다";
+      sub.textContent=extra;
+      startTip(st);
+    } else if(st.sf<1.1){
+      v.className="verdict warn";
+      v.firstChild.nodeValue="아슬아슬 — 여유가 10%도 남지 않았다";
+      sub.textContent=extra||"조금만 반경이 커져도 넘어간다. 실제 현장이라면 이미 중단 대상이다.";
+      stopTip(st);
+    } else {
+      v.className="verdict ok";
+      v.firstChild.nodeValue="안정 — 안정 모멘트가 양중 모멘트보다 크다";
+      sub.textContent=extra||("여유 "+(st.Ms-st.Ml).toFixed(1)+" t·m. 안전율 "+st.sf.toFixed(2)+"배다.");
+      stopTip(st);
+    }
+  }
+
+  function startTip(st){
+    if(tipping){ return; }
+    tipping=true;
+    if(reduce){ draw(st,15); over.classList.add("on"); return; }
+    tipT0=performance.now();
+    (function run(ts){
+      if(!tipping) return;
+      var k=Math.min((ts-tipT0)/900,1);
+      draw(state(), 15*k*k);
+      if(k<1) requestAnimationFrame(run);
+      else over.classList.add("on");
+    })(performance.now());
+  }
+  function stopTip(st){
+    tipping=false; over.classList.remove("on");
+    draw(st,0);
+  }
+  $("#tipReset").addEventListener("click", function(){
+    el.w.value=4; el.l.value=20; el.a.value=60; el.wind.value=0;
+    el.out.checked=true; el.mat.checked=true; el.cwt.checked=false;
+    tipping=false; over.classList.remove("on");
+    update();
+  });
+  Object.keys(el).forEach(function(k){
+    el[k].addEventListener("input", function(){ if(tipping){tipping=false; over.classList.remove("on");} update(); });
+    el[k].addEventListener("change", function(){ if(tipping){tipping=false; over.classList.remove("on");} update(); });
+  });
+  update();
+})();
+
+/* ================= 7. 크롤러 vs 험지형 ================= */
+(function(){
+  var s="";
+  s += ground(288, 20, 744);
+  /* 크롤러 */
+  s += '<text x="40" y="34" font-size="14" font-weight="800" fill="#17202B">ⓐ 크롤러 크레인 — 무한궤도 + 격자형 붐</text>';
+  s += '<rect x="60" y="256" width="188" height="28" rx="14" fill="#2A3947"/>';
+  for(var i=0;i<9;i++) s += '<line x1="'+(72+i*20)+'" y1="256" x2="'+(72+i*20)+'" y2="284" stroke="#8C9BA8" stroke-width="3"/>';
+  s += '<circle cx="80" cy="270" r="9" fill="#4A5C6E"/><circle cx="228" cy="270" r="9" fill="#4A5C6E"/>';
+  s += '<rect x="78" y="220" width="150" height="38" rx="3" fill="#F5B700"/>';
+  s += '<rect x="58" y="212" width="26" height="46" rx="2" fill="#17202B"/>';
+  s += '<rect x="196" y="200" width="36" height="34" rx="3" fill="#2A3947"/>';
+  (function(){
+    var px=214, py=226, ang=66*RAD, L=158;
+    var tx=px+L*Math.cos(ang), ty=py-L*Math.sin(ang);
+    var ux=-Math.sin(ang)*9, uy=-Math.cos(ang)*9;
+    s += '<g stroke="#4A5C6E" stroke-width="2.6" fill="none">';
+    s += '<line x1="'+(px+ux)+'" y1="'+(py+uy)+'" x2="'+(tx+ux)+'" y2="'+(ty+uy)+'"/>';
+    s += '<line x1="'+(px-ux)+'" y1="'+(py-uy)+'" x2="'+(tx-ux)+'" y2="'+(ty-uy)+'"/>';
+    for(var k=0;k<=8;k++){
+      var a=k/8, b=(k+0.5)/8;
+      s += '<line x1="'+(px+ux+(tx-px)*a)+'" y1="'+(py+uy+(ty-py)*a)+'" x2="'+(px-ux+(tx-px)*b)+'" y2="'+(py-uy+(ty-py)*b)+'"/>';
+    }
+    s += '</g>';
+    var jang=44*RAD, JL=76;
+    var jx=tx+JL*Math.cos(jang), jy=ty-JL*Math.sin(jang);
+    s += '<line x1="'+tx+'" y1="'+ty+'" x2="'+jx+'" y2="'+jy+'" stroke="#D8341F" stroke-width="5" stroke-linecap="round"/>';
+    s += '<text x="'+(jx+6)+'" y="'+(jy+2)+'" font-size="11" font-weight="700" fill="#D8341F">보조 붐</text>';
+    s += '<line x1="'+jx+'" y1="'+jy+'" x2="'+jx+'" y2="'+(jy+70)+'" stroke="#2A3947" stroke-width="2"/>';
+    s += '<rect x="'+(jx-14)+'" y="'+(jy+70)+'" width="28" height="24" rx="2" fill="#4A5C6E"/>';
+  })();
+  s += '<text x="60" y="316" font-size="11" fill="#4A5C6E">접지 면적이 넓다 · 자중이 커서 안정 모멘트가 크다</text>';
+
+  /* 험지형 */
+  s += '<text x="430" y="34" font-size="14" font-weight="800" fill="#17202B">ⓑ 험지형 크레인 — 고무 타이어 + 유압식 붐</text>';
+  s += '<rect x="452" y="250" width="176" height="26" rx="4" fill="#4A5C6E"/>';
+  s += '<rect x="470" y="222" width="130" height="30" rx="3" fill="#F5B700"/>';
+  s += '<rect x="570" y="206" width="34" height="32" rx="3" fill="#2A3947"/>';
+  [478,506,576,604].forEach(function(cx){
+    s += '<circle cx="'+cx+'" cy="278" r="15" fill="#17202B"/><circle cx="'+cx+'" cy="278" r="7" fill="#8C9BA8"/>';
+  });
+  s += '<line x1="452" y1="252" x2="424" y2="278" stroke="#4A5C6E" stroke-width="8" stroke-linecap="round"/>';
+  s += '<rect x="410" y="278" width="30" height="8" rx="2" fill="#2A3947"/>';
+  s += '<line x1="628" y1="252" x2="656" y2="278" stroke="#4A5C6E" stroke-width="8" stroke-linecap="round"/>';
+  s += '<rect x="642" y="278" width="30" height="8" rx="2" fill="#2A3947"/>';
+  s += '<text x="376" y="258" font-size="11" font-weight="700" fill="#2E9E6B">아웃트리거</text>';
+  s += '<line x1="406" y1="262" x2="422" y2="276" stroke="#8C9BA8" stroke-width="1"/>';
+  (function(){
+    var px=588, py=228, ang=58*RAD;
+    s += '<g transform="rotate(-58 '+px+' '+py+')">';
+    s += '<rect x="'+px+'" y="'+(py-13)+'" width="92" height="26" rx="4" fill="#B98B06"/>';
+    s += '<rect x="'+(px+82)+'" y="'+(py-10)+'" width="72" height="20" rx="3" fill="#F5B700"/>';
+    s += '<rect x="'+(px+150)+'" y="'+(py-7)+'" width="56" height="14" rx="3" fill="#FFD34D"/>';
+    s += '</g>';
+    var L=206, tx=px+L*Math.cos(ang), ty=py-L*Math.sin(ang);
+    s += '<line x1="'+tx+'" y1="'+ty+'" x2="'+tx+'" y2="'+(ty+54)+'" stroke="#2A3947" stroke-width="2"/>';
+    s += '<rect x="'+(tx-12)+'" y="'+(ty+54)+'" width="24" height="22" rx="2" fill="#4A5C6E"/>';
+  })();
+  s += '<text x="430" y="316" font-size="11" fill="#4A5C6E">선회 반경이 작다 · 아웃트리거로 고정해 인양 능력을 올린다</text>';
+  $("#compare").innerHTML=s;
+
+  /* 레이더 */
+  var axes=["인양 능력","기동성","좁은 곳 적응","지반 대응","설치 신속성"];
+  var crawler=[10,3,4,9,3], rt=[5,8,10,7,8];
+  var cx=150, cy=146, R=92, n=5, r="";
+  function pt(i,v){
+    var a=(-90+i*360/n)*RAD, d=R*v/10;
+    return [cx+d*Math.cos(a), cy+d*Math.sin(a)];
+  }
+  [2,4,6,8,10].forEach(function(g){
+    var d="";
+    for(var i=0;i<n;i++){ var p=pt(i,g); d += (i?" L":"M")+p[0]+" "+p[1]; }
+    r += '<path d="'+d+' Z" fill="none" stroke="#C7D0D8" stroke-width="1"/>';
+  });
+  for(var i=0;i<n;i++){
+    var p=pt(i,10);
+    r += '<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0]+'" y2="'+p[1]+'" stroke="#C7D0D8" stroke-width="1"/>';
+    var lp=pt(i,12.2);
+    r += '<text x="'+lp[0]+'" y="'+(lp[1]+4)+'" font-size="11" font-weight="600" fill="#4A5C6E" text-anchor="middle">'+axes[i]+'</text>';
+  }
+  function poly(vals, fill, stroke){
+    var d="";
+    for(var i=0;i<n;i++){ var p=pt(i,vals[i]); d += (i?" L":"M")+p[0]+" "+p[1]; }
+    return '<path d="'+d+' Z" fill="'+fill+'" stroke="'+stroke+'" stroke-width="2"/>';
+  }
+  r += poly(crawler,"rgba(42,57,71,.45)","#2A3947");
+  r += poly(rt,"rgba(245,183,0,.45)","#B98B06");
+  $("#radar").innerHTML=r;
+})();
+
+/* ================= 8. 특수 목적 크레인 ================= */
+(function(){
+  var SP=[
+    {t:"해상 풍력 설치선 크레인", u:"바다 한가운데서 15MW급 터빈의 타워·나셀·블레이드를 세운다. 2,500톤이 넘는 부품을 다루는 초대형 크레인이 실린다.",
+     q:"전도 축이 없는 배 위에서는 무엇이 안정 모멘트 역할을 하나?",
+     a:"선체의 부력과 밸러스트다. 다리를 해저에 박아 선체를 물 위로 들어 올리는 잭업 방식을 쓰면, 그 다리 접지점이 지문의 아웃트리거와 같은 역할을 한다."},
+    {t:"폴라 크레인 (원자로 격납건물)", u:"격납건물 천장 둘레의 원형 레일을 따라 돌며 원자로 압력용기와 증기발생기를 내려놓는다.",
+     q:"기복 없이 선회만 하는데도 작업이 되는 이유는?",
+     a:"레일 자체가 원형이라 선회만으로 건물 안 어디든 닿는다. 도달 범위를 붐 각도가 아니라 트롤리의 이동으로 조절한다."},
+    {t:"레이들 크레인 (제철소)", u:"1,500도가 넘는 쇳물이 담긴 용기를 천장에서 옮긴다. 떨어뜨리면 회복이 불가능한 작업이다.",
+     q:"왜 일반 크레인보다 훨씬 높은 안전율로 설계할까?",
+     a:"사고의 결과가 되돌릴 수 없기 때문이다. 지문이 양중 능력 표를 임계 하중의 75~85%로 잡는 것과 같은 논리를, 훨씬 보수적으로 적용한 경우다."},
+    {t:"컨테이너 크레인 (STS·RTG·RMG)", u:"항만에서 선박과 야드 사이로 컨테이너를 옮긴다. 자동화가 가장 빠르게 진행된 분야다.",
+     q:"전도 축이 어디로 옮겨 갔을까?",
+     a:"레일이나 타이어가 딛는 지지점이다. 다리가 넷이라 지지 다각형이 만들어지고, 어느 변을 넘어가느냐에 따라 전도 축이 달라진다."},
+    {t:"부유식 해상 크레인", u:"바지선 위에 크레인을 얹어 교량 상판이나 해양 구조물을 통째로 들어 올린다.",
+     q:"들어 올리는 순간 배가 기우는데 어떻게 버틸까?",
+     a:"반대쪽 밸러스트 탱크에 물을 채워 무게 중심을 옮긴다. 평형추를 실시간으로 조절하는 셈이다."},
+    {t:"링거 크레인 (초중량 인양)", u:"플랜트 모듈이나 원자로 격납 돔처럼 수천 톤짜리 덩어리를 통째로 올린다. 바닥에 깐 원형 레일 위에서 회전한다.",
+     q:"어떻게 그렇게 무거운 것을 들 수 있나?",
+     a:"평형추를 극단까지 키운 구조다. 붐 반대쪽에 별도의 카운터웨이트 대차를 달아 안정 모멘트를 끌어올린다. 지문의 평형추 원리를 끝까지 밀어붙인 형태다."},
+    {t:"발사체 기립 장치", u:"우주센터에서 눕혀 운반한 발사체를 발사대에서 수직으로 세운다.",
+     q:"기복의 각도 범위가 일반 크레인과 어떻게 다를까?",
+     a:"0°에서 90°까지 완전히 세운다. 일반 이동식 크레인이 20~80° 안에서 움직이는 것과 달리, 목표 자세 자체가 수직이다."}
+  ];
+  var h="";
+  SP.forEach(function(p,i){
+    h += '<details class="acc"><summary>'+p.t+'</summary><div class="body">'
+       + '<p>'+p.u+'</p>'
+       + '<div class="ask"><b>생각해 보기</b> '+p.q
+       + '<button type="button" class="ansBtn">답 보기</button>'
+       + '<div class="ans">'+p.a+'</div></div>'
+       + '</div></details>';
+  });
+  $("#specials").innerHTML=h;
+  $$("#specials .ansBtn").forEach(function(b){
+    b.addEventListener("click", function(){
+      var box=b.closest(".ask");
+      box.classList.toggle("open");
+      b.textContent = box.classList.contains("open") ? "답 닫기" : "답 보기";
+    });
+  });
+})();
+
+/* ================= 형성평가 ================= */
+(function(){
+  var Q=[
+    {s:"붐이 수직 방향으로 위아래로 움직이는 것을 무엇이라 하는가?",
+     o:["선회","기복","신축","권상"], c:1,
+     w:"수직 방향으로 움직이는 것이 기복, 수평 방향으로 움직이는 것이 선회다. 시험에서 이 둘을 바꿔 놓는 진술이 자주 나온다."},
+    {s:"유압 실린더로 길이를 늘이고 줄일 수 있는 붐은?",
+     o:["격자형 붐","유압식 붐","둘 다 가능","둘 다 불가능"], c:1,
+     w:"격자형 붐은 트러스 세그먼트를 조립해 길이를 만든다. 작업 중 신축이 가능한 것은 유압식 붐뿐이다."},
+    {s:"크레인이 전도되지 않으려면 안정 모멘트가 양중 모멘트보다 어떠해야 하는가?",
+     o:["작아야 한다","같기만 하면 된다","크거나 같아야 한다","관계없다"], c:2,
+     w:"지문은 안정 모멘트가 양중 모멘트보다 크거나 같을 때 전도가 일어나지 않을 수 있다고 했고, 가장 중요한 조건으로 안정 모멘트가 더 커야 한다고 못 박았다."},
+    {s:"크롤러 크레인과 험지형 크레인 중 무거운 물체를 들어 올리는 데 유리한 쪽은?",
+     o:["크롤러 크레인","험지형 크레인","차이 없다","붐 종류에만 달렸다"], c:0,
+     w:"크롤러 크레인은 이동식 크레인 중 가장 무겁고 크다. 크레인 중량이 클수록 안정 모멘트가 커지므로 중량물 인양에 유리하다."},
+    {s:"크레인 받침목의 역할로 옳은 것은?",
+     o:["지면 압력을 한곳에 집중시킨다","지면 압력을 분산해 침하를 막는다","붐의 길이를 늘인다","선회 속도를 높인다"], c:1,
+     w:"받침목은 접지 면적을 넓혀 지면에 가해지는 압력을 분산하고 크레인이 땅 밑으로 가라앉지 않게 한다. 압력을 집중시킨다는 진술은 정반대다."},
+    {s:"양중 능력 표에 실리는 값은 대체로 임계 하중의 몇 % 수준인가?",
+     o:["40~50%","60~70%","75~85%","95~100%"], c:2,
+     w:"크레인의 강도를 비롯한 여러 요소를 고려해 임계 하중의 75~85% 수준으로 정한다. 표의 값은 이미 안전 여유를 담은 숫자다."}
+  ];
+  var list=$("#quizList");
+  function build(){
+    var h="";
+    Q.forEach(function(q,i){
+      h += '<div class="q" data-i="'+i+'"><p class="stem">'+(i+1)+'. '+q.s+'</p>';
+      q.o.forEach(function(o,j){
+        h += '<label><input type="radio" name="q'+i+'" value="'+j+'">'+o+'</label>';
+      });
+      h += '<div class="why">'+q.w+'</div></div>';
+    });
+    list.innerHTML=h;
+    $("#scoreBox").style.display="none";
+  }
+  build();
+  /* ---------- 채점 표시 (제출 성공 후에만 실행) ---------- */
+  function grade(){
+    var n=0;
+    $$(".q", list).forEach(function(box){
+      var i=+box.dataset.i;
+      box.classList.add("done");
+      box.classList.remove("missing");
+      $$("label", box).forEach(function(lb,j){
+        lb.classList.remove("right","wrong");
+        var inp=$("input",lb);
+        inp.disabled=true;                       /* 정답 확인 후 답 바꾸기 방지 */
+        if(j===Q[i].c) lb.classList.add("right");
+        if(inp.checked && j!==Q[i].c) lb.classList.add("wrong");
+        if(inp.checked && j===Q[i].c) n++;
+      });
+    });
+    var sb=$("#scoreBox");
+    sb.style.display="block";
+    sb.innerHTML='<span class="num">'+n+'</span> / '+Q.length+' 정답'
+      + (n===Q.length ? ' — 지문의 핵심 관계를 모두 잡았다.' : ' — 틀린 문항의 설명을 읽고 해당 화면으로 돌아가 확인해 보라.');
+    return n;
+  }
+
+  /* ================= 2단계: 교사 구글 시트로 제출 =================
+     ① 앱스크립트 웹 앱(index.html)으로 열면 google.script.run으로 바로 제출
+     ② 이 파일을 앱스크립트 밖(제미나이 공유·깃허브 등)에서 열 때만
+        아래 WEB_APP_URL에 웹 앱 주소(…/exec)를 넣는다               */
+  var WEB_APP_URL = "";
+  var QUIZ_ID = "crane";                         /* Code.gs의 QUIZZES 키와 같아야 함 */
+
+  var idIn=$("#stuId"), nameIn=$("#stuName"), btn=$("#submitBtn"), msg=$("#submitMsg");
+  function say(type, text){ msg.className="msg on "+type; msg.textContent=text; }
+
+  function send(payload){
+    if(window.google && google.script && google.script.run){
+      return new Promise(function(resolve,reject){
+        google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).submitQuiz(payload);
+      });
+    }
+    if(WEB_APP_URL){
+      return fetch(WEB_APP_URL,{
+        method:"POST",
+        headers:{"Content-Type":"text/plain;charset=utf-8"},   /* 사전 요청(CORS) 회피 */
+        body:JSON.stringify(payload)
+      }).then(function(r){ return r.json(); })
+        .then(function(res){ if(!res.ok) throw new Error(res.error||"기록 실패"); return res; });
+    }
+    return Promise.reject(new Error("제출 주소가 설정되지 않았다. 선생님께 알려 줘."));
+  }
+
+  btn.addEventListener("click", function(){
+    var id=idIn.value.trim(), name=nameIn.value.trim();
+    idIn.classList.toggle("bad", !/^\d{4,6}$/.test(id));
+    nameIn.classList.toggle("bad", !name);
+    if(!/^\d{4,6}$/.test(id)){ say("err","학번을 숫자 4~6자리로 입력해 줘. (예: 30115)"); idIn.focus(); return; }
+    if(!name){ say("err","이름을 입력해 줘."); nameIn.focus(); return; }
+
+    var answers=[], missing=0;
+    $$(".q", list).forEach(function(box){
+      var c=$("input:checked", box);
+      answers.push(c ? +c.value : -1);
+      box.classList.toggle("missing", !c);
+      if(!c) missing++;
+    });
+    if(missing){ say("err","아직 고르지 않은 문항이 "+missing+"개 있다. 빨간 테두리 문항을 확인해 줘."); return; }
+
+    btn.disabled=true; btn.textContent="제출 중…";
+    say("wait","교사 시트에 기록하는 중이다. 창을 닫지 마.");
+    send({quizId:QUIZ_ID, studentId:id, name:name, answers:answers})
+      .then(function(res){
+        grade();
+        btn.textContent="제출 완료";
+        say("ok", name+"("+id+") 제출 완료 · "+res.attempt+"회차 · 기록 점수 "+res.score+"/"+res.total+" · "+res.time);
+      })
+      .catch(function(err){
+        btn.disabled=false; btn.textContent="채점 및 제출";
+        say("err","제출하지 못했다: "+((err && err.message) || err)+" — 잠시 후 다시 눌러 줘.");
+      });
+  });
+
+  $("#resetBtn").addEventListener("click", function(){
+    build();
+    btn.disabled=false; btn.textContent="채점 및 제출";
+    msg.className="msg";
+  });
+
+  var panel=$("#quizPanel");
+  $("#quizBtn").addEventListener("click", function(){ panel.classList.add("on"); });
+  $("#quizClose").addEventListener("click", function(){ panel.classList.remove("on"); });
+  document.addEventListener("keydown", function(e){ if(e.key==="Escape") panel.classList.remove("on"); });
+})();
+
+})();
+
+</script>
+</body>
+</html>
