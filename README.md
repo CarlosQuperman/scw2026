@@ -41,6 +41,9 @@ https://gw1.kr/신철원바이브
 * 스쿨보드: https://schoolboard.cc/
 * 폴라리스오피스 도구: https://www.polarisofficetools.com/
 
+## 프롬프트 모음
+https://claude.ai/artifact/Piid3nXd2cjJTmv9cZx21d
+
 
 ## 마무리 출결 링크 및 만족도 조사 링크(15:10분에 해주세요)
 
